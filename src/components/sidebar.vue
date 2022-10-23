@@ -60,7 +60,7 @@ const items = [
 		icon: 'Odometer',
 		index: '/dashboard',
 		title: '系统首页',
-		permiss: '1'
+		permiss: 'dashboard'
 	},
 	{
 		icon: 'Calendar',
@@ -69,10 +69,10 @@ const items = [
 		permiss: '2'
 	},
 	{
-		icon: 'DocumentCopy',
+		icon: 'Message',
 		index: '/tabs',
-		title: 'tab选项卡',
-		permiss: '3'
+		title: '我的消息',
+		permiss: 'myMessage'
 	},
 	{
 		icon: 'Edit',
@@ -132,7 +132,47 @@ const items = [
 		index: '/donate',
 		title: '支持作者',
 		permiss: '14'
-	}
+	}, {
+    icon: 'DocumentCopy',
+    index: '/publishNews',
+    title: '发布通知',
+    permiss: 'publishNews'
+  }, {
+    icon: 'Edit',
+    index: '/hireTeacher',
+    title: '招募导生',
+    permiss: 'hireTeacher'
+  }, {
+    icon: 'Calendar',
+    index: '/startClass',
+    title: '开班管理',
+    permiss: 'startClass'
+  }, {
+    icon: 'DocumentCopy',
+    index: '/enrollClass',
+    title: '报名上课',
+    permiss: 'enrollClass'
+  }, {
+    icon: 'Calendar',
+    index: '/iLearn',
+    title: '我的课程',
+    permiss: 'iLearn'
+  }, {
+    icon: 'CoffeeCup',
+    index: '/myInterview',
+    title: '我的面试',
+    permiss: 'myInterview'
+  }, {
+    icon: 'Calendar',
+    index: '/iTeach',
+    title: '我教的课',
+    permiss: 'iTeach'
+  }, {
+    icon: 'DocumentCopy',
+    index: '/enrollTeach',
+    title: '报名授课',
+    permiss: 'enrollTeach'
+  }
 ];
 
 const route = useRoute();

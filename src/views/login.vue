@@ -1,7 +1,7 @@
 <template>
 	<div class="login-wrap">
 		<div class="ms-login">
-			<div class="ms-title">后台管理系统</div>
+			<div class="ms-title">校园互助辅导平台</div>
 			<el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
 				<el-form-item prop="username">
 					<el-input v-model="param.username" placeholder="username">
@@ -69,7 +69,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
 		if (valid) {
 			ElMessage.success('登录成功');
 			localStorage.setItem('ms_username', param.username);
-			const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
+			// const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
+			const keys = permiss.defaultList[param.username];
 			permiss.handleSet(keys);
 			localStorage.setItem('ms_keys', JSON.stringify(keys));
 			router.push('/');

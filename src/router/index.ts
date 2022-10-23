@@ -16,7 +16,7 @@ const routes:RouteRecordRaw[] = [
                 name: "dashboard",
                 meta: {
                     title: '系统首页',
-                    permiss: '1'
+                    permiss: 'dashboard'
                 },
                 component: () => import ( /* webpackChunkName: "dashboard" */ "../views/dashboard.vue")
             }, {
@@ -47,8 +47,8 @@ const routes:RouteRecordRaw[] = [
                 path: "/tabs",
                 name: "tabs",
                 meta: {
-                    title: 'tab标签',
-                    permiss: '3'
+                    title: '我的消息',
+                    permiss: 'myMessage'
                 },
                 component: () => import ( /* webpackChunkName: "tabs" */ "../views/tabs.vue")
             }, {
@@ -106,6 +106,70 @@ const routes:RouteRecordRaw[] = [
                     permiss: '9'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/markdown.vue')
+            }, {
+                path: '/publishNews',
+                name: 'publishNews',
+                meta: {
+                    title: '发布通知',
+                    permiss: 'publishNews'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/publishNews.vue')
+            }, {
+                path: '/hireTeacher',
+                name: 'hireTeacher',
+                meta: {
+                    title: '招募导生',
+                    permiss: 'hireTeacher'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/hireTeacher.vue')
+            }, {
+                path: '/startClass',
+                name: 'startClass',
+                meta: {
+                    title: '开班管理',
+                    permiss: 'startClass'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/startClass.vue')
+            }, {
+                path: '/enrollClass',
+                name: 'enrollClass',
+                meta: {
+                    title: '报名上课',
+                    permiss: 'enrollClass'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollClass.vue')
+            }, {
+                path: '/iLearn',
+                name: 'iLearn',
+                meta: {
+                    title: '我的课程',
+                    permiss: 'iLearn'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/iLearn.vue')
+            }, {
+                path: '/myInterview',
+                name: 'myInterview',
+                meta: {
+                    title: '我的面试',
+                    permiss: 'myInterview'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/myInterview.vue')
+            }, {
+                path: '/iTeach',
+                name: 'iTeach',
+                meta: {
+                    title: '我教的课',
+                    permiss: 'iTeach'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/iTeach.vue')
+            }, {
+                path: '/enrollTeach',
+                name: 'enrollTeach',
+                meta: {
+                    title: '报名授课',
+                    permiss: 'enrollTeach'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollTeach.vue')
             }
         ]
     }, {
