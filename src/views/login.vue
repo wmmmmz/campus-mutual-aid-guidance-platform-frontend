@@ -22,10 +22,18 @@
 						</template>
 					</el-input>
 				</el-form-item>
-				<div class="login-btn">
-					<el-button type="primary" @click="submitForm(login)">登录</el-button>
+				<div class="identity-btn">
+          &nbsp&nbsp&nbsp&nbsp
+          <el-radio-group v-model="param.identity">
+            <el-radio label="student">学生</el-radio>
+            <el-radio label="teacher">导生</el-radio>
+            <el-radio label="admin">管理员</el-radio>
+          </el-radio-group>
 				</div>
-				<p class="login-tips">Tips : 用户名和密码随便填。</p>
+        <div class="login-btn">
+          <el-button type="primary" size="mini" @click="submitForm(login)">登陆</el-button>
+        </div>
+
 			</el-form>
 		</div>
 	</div>
@@ -39,16 +47,21 @@ import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
 import { Lock, User } from '@element-plus/icons-vue';
+import axios from "axios";
 
 interface LoginInfo {
 	username: string;
 	password: string;
+  identity: string;
 }
 
+let code: number
+let message: string
 const router = useRouter();
 const param = reactive<LoginInfo>({
 	username: 'admin',
-	password: '123123'
+	password: '111111',
+  identity: 'admin'
 });
 
 const rules: FormRules = {
@@ -67,13 +80,29 @@ const submitForm = (formEl: FormInstance | undefined) => {
 	if (!formEl) return;
 	formEl.validate((valid: boolean) => {
 		if (valid) {
-			ElMessage.success('登录成功');
-			localStorage.setItem('ms_username', param.username);
-			// const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
-			const keys = permiss.defaultList[param.username];
-			permiss.handleSet(keys);
-			localStorage.setItem('ms_keys', JSON.stringify(keys));
-			router.push('/');
+      const data = {
+        username: param.username,
+        pwd: param.password,
+        role: param.identity
+      };
+      localStorage.setItem('ms_username', param.username);
+      axios.post("/login", data).then(response=>{
+        const data = response.data
+        if (data.code === 200){
+          const keys = permiss.defaultList[param.identity];
+          permiss.handleSet(keys);
+          localStorage.setItem('ms_keys', JSON.stringify(keys));
+          ElMessage.success('登录成功');
+          router.push('/');
+        }else {
+          ElMessage.error('登录失败');
+          return false;
+        }
+        message = data.message
+      }).catch(error => {
+        console.log(error.response)
+      });
+
 		} else {
 			ElMessage.error('登录成功');
 			return false;
@@ -121,6 +150,10 @@ tags.clearTags();
 	width: 100%;
 	height: 36px;
 	margin-bottom: 10px;
+}
+.identity-btn div{
+  height: 36px;
+  margin-bottom: 10px;
 }
 .login-tips {
 	font-size: 12px;
