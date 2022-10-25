@@ -195,8 +195,8 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    document.title = `${to.meta.title} | vue-manage-system`;
-    const role = localStorage.getItem('ms_username');
+    document.title = `${to.meta.title} | 校园互助辅导平台`;
+    const role = localStorage.getItem('sa_token');
     const permiss = usePermissStore();
     if (!role && to.path !== '/login') {
         next('/login');

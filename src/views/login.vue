@@ -33,7 +33,7 @@
         <div class="login-btn">
           <el-button type="primary" size="mini" @click="submitForm(login)">登陆</el-button>
         </div>
-
+        <p class="login-tips">{{errorMessage}}</p>
 			</el-form>
 		</div>
 	</div>
@@ -55,8 +55,7 @@ interface LoginInfo {
   identity: string;
 }
 
-let code: number
-let message: string
+let errorMessage: string
 const router = useRouter();
 const param = reactive<LoginInfo>({
 	username: 'admin',
@@ -85,20 +84,21 @@ const submitForm = (formEl: FormInstance | undefined) => {
         pwd: param.password,
         role: param.identity
       };
-      localStorage.setItem('ms_username', param.username);
       axios.post("/login", data).then(response=>{
         const data = response.data
         if (data.code === 200){
           const keys = permiss.defaultList[param.identity];
           permiss.handleSet(keys);
           localStorage.setItem('ms_keys', JSON.stringify(keys));
+          localStorage.setItem('sa_token', data.data)
+          localStorage.setExpire("sa_token", data.data, 50)
           ElMessage.success('登录成功');
           router.push('/');
         }else {
-          ElMessage.error('登录失败');
+          errorMessage = data.message
+          ElMessage.error(errorMessage);
           return false;
         }
-        message = data.message
       }).catch(error => {
         console.log(error.response)
       });
@@ -109,7 +109,26 @@ const submitForm = (formEl: FormInstance | undefined) => {
 		}
 	});
 };
-
+Storage.prototype.setExpire=(key: string, value: any, expire: any) =>{
+  let obj={
+    data:value,
+    time:Date.now(),
+    expire:expire
+  };
+  localStorage.setItem(key,JSON.stringify(obj));
+}
+Storage.prototype.getExpire= (key: string) =>{
+  let val =localStorage.getItem(key);
+  if(!val){
+    return val;
+  }
+  val =JSON.parse(val);
+  if(Date.now()-val.time>val.expire){
+    localStorage.removeItem(key);
+    return null;
+  }
+  return val.data;
+}
 const tags = useTagsStore();
 tags.clearTags();
 </script>

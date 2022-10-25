@@ -45,6 +45,8 @@ import { onMounted } from 'vue';
 import { useSidebarStore } from '../store/sidebar';
 import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.jpg';
+import axios from "axios";
+import {ElMessage} from "element-plus";
 
 const username: string | null = localStorage.getItem('ms_username');
 const message: number = 2;
@@ -66,7 +68,16 @@ const router = useRouter();
 const handleCommand = (command: string) => {
 	if (command == 'loginout') {
 		localStorage.removeItem('ms_username');
-		router.push('/login');
+    axios.post("/loginOut").then(response=>{
+      const data = response.data
+      if (data.code === 200){
+        localStorage.removeItem('sa_token')
+        localStorage.removeItem('ms_keys')
+        router.push('/login');
+      }
+    }).catch(error => {
+      console.log(error.response)
+    });
 	} else if (command == 'user') {
 		router.push('/user');
 	}
