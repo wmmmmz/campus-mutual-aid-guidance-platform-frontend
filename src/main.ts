@@ -18,8 +18,24 @@ app.use(router)
 app.use(ElementPlus, {
     locale: zhCn,
 })
-// axios.defaults.withCredentials = true
-axios.defaults.baseURL = 'http://127.0.0.1:8084'
+axios.defaults.baseURL = 'http://127.0.0.1:22222'
+// http request拦截器 添加一个请求拦截器
+axios.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    let token = window.localStorage.getItem("sa_token")
+    if (token != null) {
+        config.headers!.token = token;    //将token放到请求头发送给服务器
+        //这里经常搭配token使用，将token值配置到tokenkey中，将tokenkey放在请求头中
+        // config.headers['accessToken'] = Token;
+    }
+    return config;
+}, function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+});
+
+
+
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)

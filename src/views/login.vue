@@ -91,7 +91,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
           permiss.handleSet(keys);
           localStorage.setItem('ms_keys', JSON.stringify(keys));
           localStorage.setItem('sa_token', data.data)
-          localStorage.setExpire("sa_token", data.data, 50)
+          // localStorage.setExpire("sa_token", data.data, 50)
           ElMessage.success('登录成功');
           router.push('/');
         }else {
@@ -109,26 +109,26 @@ const submitForm = (formEl: FormInstance | undefined) => {
 		}
 	});
 };
-Storage.prototype.setExpire=(key: string, value: any, expire: any) =>{
-  let obj={
-    data:value,
-    time:Date.now(),
-    expire:expire
-  };
-  localStorage.setItem(key,JSON.stringify(obj));
-}
-Storage.prototype.getExpire= (key: string) =>{
-  let val =localStorage.getItem(key);
-  if(!val){
-    return val;
-  }
-  val =JSON.parse(val);
-  if(Date.now()-val.time>val.expire){
-    localStorage.removeItem(key);
-    return null;
-  }
-  return val.data;
-}
+// Storage.prototype.setExpire=(key: string, value: any, expire: any) =>{
+//   let obj={
+//     data:value,
+//     time:Date.now(),
+//     expire:expire
+//   };
+//   localStorage.setItem(key,JSON.stringify(obj));
+// }
+// Storage.prototype.getExpire= (key: string) =>{
+//   let val =localStorage.getItem(key);
+//   if(!val){
+//     return val;
+//   }
+//   val =JSON.parse(val);
+//   if(Date.now()-val.time>val.expire){
+//     localStorage.removeItem(key);
+//     return null;
+//   }
+//   return val.data;
+// }
 const tags = useTagsStore();
 tags.clearTags();
 </script>
