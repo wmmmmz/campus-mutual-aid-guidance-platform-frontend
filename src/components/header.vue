@@ -67,12 +67,12 @@ onMounted(() => {
 const router = useRouter();
 const handleCommand = (command: string) => {
 	if (command == 'loginout') {
-		localStorage.removeItem('ms_username');
     axios.post("/loginOut").then(response=>{
       const data = response.data
       if (data.code === 200){
         localStorage.removeItem('sa_token')
         localStorage.removeItem('ms_keys')
+        localStorage.clear()
         router.push('/login');
       }
     }).catch(error => {

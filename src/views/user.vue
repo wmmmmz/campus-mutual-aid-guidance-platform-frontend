@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-row :gutter="20">
+		<el-row :gutter="20" >
 			<el-col :span="12">
 				<el-card shadow="hover">
 					<template #header>
@@ -10,39 +10,65 @@
 					</template>
 					<div class="info">
 						<div class="info-image" @click="showDialog">
-							<el-avatar :size="100" :src="avatarImg" />
+							<el-avatar :size="110" :src="avatarImg" />
 							<span class="info-edit">
 								<i class="el-icon-lx-camerafill"></i>
 							</span>
 						</div>
-						<div class="info-name">{{ name }}</div>
-						<div class="info-desc">不可能！我的代码怎么可能会有bug！</div>
+            <br>
+						<div class="info-name">{{ username }}</div>
+						<div class="info-desc">班级：{{className}}</div>
+						<div class="info-desc">学号：{{stuId}}</div>
+						<div class="info-desc">联系电话：{{form.tel}}</div>
+						<div class="info-desc">微信号：{{form.wx}}</div>
+						<div class="info-desc">账号类型：{{role}}账号</div>
+						<div class="info-desc">个人简介：{{form.desc}}</div>
 					</div>
+          <br>
 				</el-card>
 			</el-col>
 			<el-col :span="12">
 				<el-card shadow="hover">
 					<template #header>
 						<div class="clearfix">
-							<span>账户编辑</span>
+							<span>账户信息编辑</span>
 						</div>
 					</template>
-					<el-form label-width="90px">
-						<el-form-item label="用户名："> {{ name }} </el-form-item>
-						<el-form-item label="旧密码：">
-							<el-input type="password" v-model="form.old"></el-input>
-						</el-form-item>
-						<el-form-item label="新密码：">
-							<el-input type="password" v-model="form.new"></el-input>
-						</el-form-item>
-						<el-form-item label="个人简介：">
-							<el-input v-model="form.desc"></el-input>
-						</el-form-item>
-						<el-form-item>
-							<el-button type="primary" @click="onSubmit">保存</el-button>
-						</el-form-item>
-					</el-form>
+          <el-form label-width="90px">
+            <el-form-item label="学号："> {{ stuId }} </el-form-item>
+            <el-form-item label="联系电话：">
+              <el-input type="text" v-model="form.tel"></el-input>
+            </el-form-item>
+            <el-form-item label="微信号：">
+              <el-input type="text" v-model="form.wx"></el-input>
+            </el-form-item>
+            <el-form-item label="个人简介：">
+              <el-input v-model="form.desc"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="onSubmit">保存</el-button>
+            </el-form-item>
+          </el-form>
 				</el-card>
+        <el-card shadow="hover">
+          <template #header>
+            <div class="clearfix">
+              <span>修改账户密码</span>
+            </div>
+          </template>
+        <el-form label-width="90px">
+          <el-form-item label="学号："> {{ stuId }} </el-form-item>
+          <el-form-item label="旧密码：">
+            <el-input type="password" v-model="form.old"></el-input>
+          </el-form-item>
+          <el-form-item label="新密码：">
+            <el-input type="password" v-model="form.new"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmitPwd">保存并重新登陆</el-button>
+          </el-form-item>
+        </el-form>
+        </el-card>
 			</el-col>
 		</el-row>
 		<el-dialog title="裁剪图片" v-model="dialogVisible" width="600px">
@@ -73,14 +99,79 @@ import { reactive, ref } from 'vue';
 import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
+import axios from "axios";
+import {useRouter} from "vue-router";
+import { ElMessage } from 'element-plus';
 
-const name = localStorage.getItem('ms_username');
+const stuId = localStorage.getItem('stuId');
+const className = localStorage.getItem('className');
+let telephone = localStorage.getItem('telephone');
+const description = localStorage.getItem('description');
+const wx = localStorage.getItem('wx');
+const username = localStorage.getItem('username');
+const role = localStorage.getItem('role');
 const form = reactive({
+  tel: localStorage.getItem('telephone'),
 	old: '',
 	new: '',
-	desc: '不可能！我的代码怎么可能会有bug！'
+  wx: localStorage.getItem('wx'),
+	desc: localStorage.getItem('description')
 });
-const onSubmit = () => {};
+const router = useRouter();
+const onSubmit = () => {
+  const data = {
+    stuId: stuId,
+    tel: form.tel,
+    wx: form.wx,
+    description: form.desc,
+    role: role
+  };
+  axios.post('/user/updateOrSave', data).then(response =>{
+     if (response.data.code == 200){
+       localStorage.setItem('telephone', response.data.data!.tel);
+       localStorage.setItem('wx', response.data.data!.wx);
+       localStorage.setItem('description', response.data.data!.description);
+       ElMessage.success("修改成功")
+       router.push('/user');
+     }else {
+       ElMessage.error("修改失败")
+     }
+  }).catch(error => {
+    console.log(error.response)
+  });
+};
+const onSubmitPwd = () => {
+  const dataOld = {
+    stuId: stuId,
+    role: role,
+    pwd: form.old
+  };
+  const dataNew = {
+    stuId: stuId,
+    role: role,
+    pwd: form.new
+  };
+  axios.post('/user/checkPassword', dataOld).then(response =>{
+    if(response.data.code == 200){
+      if(form.new != form.old){
+        axios.post('/user/changePassword', dataNew).then(response =>{
+          if (response.data.code == 200){
+            ElMessage.success("修改成功")
+            router.push('/login')
+          }else{
+            ElMessage.error("修改失败")
+          }
+        })
+      }else{
+        ElMessage.error("新密码不能与旧密码相同")
+      }
+    }else{
+      ElMessage.error("旧密码错误")
+    }
+  })
+
+
+};
 
 const avatarImg = ref(avatar);
 const imgSrc = ref('');
@@ -113,6 +204,7 @@ const cropImage = () => {
 
 const saveAvatar = () => {
 	avatarImg.value = cropImg.value;
+  console.log(avatarImg.value)
 	dialogVisible.value = false;
 };
 </script>
@@ -124,9 +216,9 @@ const saveAvatar = () => {
 }
 .info-image {
 	position: relative;
-	margin: auto;
-	width: 100px;
-	height: 100px;
+  margin: auto;
+	width: 111px;
+	height: 111px;
 	background: #f8f8f8;
 	border: 1px solid #eee;
 	border-radius: 50px;
@@ -154,7 +246,7 @@ const saveAvatar = () => {
 	opacity: 1;
 }
 .info-name {
-	margin: 15px 0 10px;
+	margin: 15px 0 20px;
 	font-size: 24px;
 	font-weight: 500;
 	color: #262626;
@@ -170,5 +262,8 @@ const saveAvatar = () => {
 	top: 0;
 	opacity: 0;
 	cursor: pointer;
+}
+.info-desc{
+  margin-bottom: 20px;
 }
 </style>

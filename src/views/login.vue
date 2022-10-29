@@ -90,7 +90,18 @@ const submitForm = (formEl: FormInstance | undefined) => {
           const keys = permiss.defaultList[param.identity];
           permiss.handleSet(keys);
           localStorage.setItem('ms_keys', JSON.stringify(keys));
-          localStorage.setItem('sa_token', data.data)
+          localStorage.setItem('stuId', data.data!.stuId)
+          localStorage.setItem('username', data.data!.name)
+          if ( data.data!.tel != undefined)
+            localStorage.setItem('telephone', data.data!.tel)
+          localStorage.setItem('role', data.data!.role)
+          if ( data.data!.description != undefined)
+            localStorage.setItem('description', data.data!.description)
+          if ( data.data!.wx != undefined)
+          localStorage.setItem('wx', data.data!.wx)
+          if ( data.data!.className != undefined)
+            localStorage.setItem('className', data.data!.className)
+          localStorage.setItem('sa_token', data.data!.saTokenValue)
           // localStorage.setExpire("sa_token", data.data, 50)
           ElMessage.success('登录成功');
           router.push('/');

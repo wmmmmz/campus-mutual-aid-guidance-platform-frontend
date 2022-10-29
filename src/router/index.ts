@@ -170,6 +170,14 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'enrollTeach'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollTeach.vue')
+            }, {
+                path: '/termManager',
+                name: 'termManager',
+                meta: {
+                    title: '学期管理',
+                    permiss: 'termManager'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/termManager.vue')
             }
         ]
     }, {

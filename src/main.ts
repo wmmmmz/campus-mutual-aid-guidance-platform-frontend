@@ -24,9 +24,7 @@ axios.interceptors.request.use(function (config) {
     // Do something before request is sent
     let token = window.localStorage.getItem("sa_token")
     if (token != null) {
-        config.headers!.token = token;    //将token放到请求头发送给服务器
-        //这里经常搭配token使用，将token值配置到tokenkey中，将tokenkey放在请求头中
-        // config.headers['accessToken'] = Token;
+        config.headers!.token = token;
     }
     return config;
 }, function (error) {

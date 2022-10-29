@@ -172,6 +172,11 @@ const items = [
     index: '/enrollTeach',
     title: '报名授课',
     permiss: 'enrollTeach'
+  }, {
+    icon: 'PieChart',
+    index: '/termManager',
+    title: '学期管理',
+    permiss: 'termManager'
   }
 ];
 
