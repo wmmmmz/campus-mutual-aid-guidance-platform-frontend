@@ -54,7 +54,7 @@ interface LoginInfo {
 	password: string;
   identity: string;
 }
-
+let dataUrl: string
 let errorMessage: string
 const router = useRouter();
 const param = reactive<LoginInfo>({
@@ -102,6 +102,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
           if ( data.data!.className != undefined)
             localStorage.setItem('className', data.data!.className)
           localStorage.setItem('sa_token', data.data!.saTokenValue)
+          localStorage.setItem('img', data.data!.imgBase64)
           // localStorage.setExpire("sa_token", data.data, 50)
           ElMessage.success('登录成功');
           router.push('/');
@@ -120,6 +121,24 @@ const submitForm = (formEl: FormInstance | undefined) => {
 		}
 	});
 };
+
+const imgUrlToBase64 = (imageUrl: string): string =>{
+  let image = new Image() // 一定要设置为let，不然图片不显示
+  image.setAttribute('crossOrigin', 'anonymous') // 解决跨域问题
+  image.src = imageUrl // 如果是本地图片替换为 image.src = imageUrl
+  image.onload = () => {
+    var canvas = document.createElement("canvas")
+    canvas.width = image.width
+    canvas.height = image.height
+    var context = canvas.getContext('2d')
+    context!.drawImage(image, 0, 0, image.width, image.height)
+    var quality = 0.8
+    dataUrl = canvas.toDataURL("image/jpeg", quality) // 使用toDataUrl将图片转换成jpeg的格式,不要把图片压缩成png，因为压缩成png后base64的字符串可能比不转换前的长！
+  }
+  console.log(dataUrl)
+  return dataUrl;
+}
+
 // Storage.prototype.setExpire=(key: string, value: any, expire: any) =>{
 //   let obj={
 //     data:value,

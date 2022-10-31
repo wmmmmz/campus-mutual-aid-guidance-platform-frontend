@@ -9,8 +9,10 @@
 						</div>
 					</template>
 					<div class="info">
-						<div class="info-image" @click="showDialog">
-							<el-avatar :size="110" :src="avatarImg" />
+<!--            <img :src="form.img" >-->
+
+            						<div class="info-image" @click="showDialog">
+							<el-avatar :size="110" :src="form.imgSrc" />
 							<span class="info-edit">
 								<i class="el-icon-lx-camerafill"></i>
 							</span>
@@ -74,7 +76,7 @@
 		<el-dialog title="裁剪图片" v-model="dialogVisible" width="600px">
 			<vue-cropper
 				ref="cropper"
-				:src="imgSrc"
+				:src="form.imgSrc"
 				:ready="cropImage"
 				:zoom="cropImage"
 				:cropmove="cropImage"
@@ -115,7 +117,10 @@ const form = reactive({
 	old: '',
 	new: '',
   wx: localStorage.getItem('wx'),
-	desc: localStorage.getItem('description')
+	desc: localStorage.getItem('description'),
+  img: localStorage.getItem('img'),
+  imgSrc: localStorage.getItem('img'),
+  copyImg:''
 });
 const router = useRouter();
 const onSubmit = () => {
@@ -173,15 +178,13 @@ const onSubmitPwd = () => {
 
 };
 
-const avatarImg = ref(avatar);
-const imgSrc = ref('');
-const cropImg = ref('');
+let avatarImg;
+let cropImg = ref('');
 const dialogVisible = ref(false);
-const cropper: any = ref();
+let cropper: any = ref();
 
 const showDialog = () => {
 	dialogVisible.value = true;
-	imgSrc.value = avatarImg.value;
 };
 
 const setImage = (e: any) => {
@@ -192,7 +195,7 @@ const setImage = (e: any) => {
 	const reader = new FileReader();
 	reader.onload = (event: any) => {
 		dialogVisible.value = true;
-		imgSrc.value = event.target.result;
+    form.imgSrc = event.target.result;
 		cropper.value && cropper.value.replace(event.target.result);
 	};
 	reader.readAsDataURL(file);
@@ -200,12 +203,26 @@ const setImage = (e: any) => {
 
 const cropImage = () => {
 	cropImg.value = cropper.value.getCroppedCanvas().toDataURL();
+  form.imgSrc = cropImg.value
 };
 
 const saveAvatar = () => {
-	avatarImg.value = cropImg.value;
-  console.log(avatarImg.value)
-	dialogVisible.value = false;
+  const data = {
+    stuId: stuId,
+    role: role,
+    imgBase64: form.imgSrc
+  };
+	// avatarImg = cropImg.value
+  // form.imgSrc = avatarImg
+	dialogVisible.value= false;
+  axios.post('/user/savePhoto', data).then(response =>{
+    if (response.data.code == 200){
+      localStorage.setItem('img', response.data.data!.imgBase64)
+      ElMessage.success("修改成功")
+    }else{
+      ElMessage.error("修改失败")
+    }
+  })
 };
 </script>
 
