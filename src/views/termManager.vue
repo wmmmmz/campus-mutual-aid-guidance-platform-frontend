@@ -3,7 +3,7 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>当前学期：2022年春季学期</h2>
+          <h2>当前学期：{{form.termToday}}</h2>
         </div>
       </template>
       <el-table :data="tableData" style="width: 100%">
@@ -139,7 +139,8 @@ const form = reactive({
   timeValue:[],
   isUpdate: false,
   url:'',
-  search:''
+  search:'',
+  termToday:''
 })
 // const term =reactive<Term>({
 //   name: '',
@@ -237,6 +238,13 @@ watch(
         axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
           tableData.value = (re.data.data)
         })
+      axios.get('/term/getTermToday').then(re => {
+        if (re.data.code == 200)
+          form.termToday = re.data.data
+        else
+          form.termToday = '学期不存在'
+        console.log(form.termToday)
+      })
     },
 
     { immediate: true }
