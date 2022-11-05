@@ -7,8 +7,8 @@
         </div>
       </template>
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column label="学期名" prop="name" width="180"/>
-        <el-table-column label="开始时间" width="180">
+        <el-table-column label="学期名" prop="name" min-width="15%"/>
+        <el-table-column label="开始时间" min-width="15%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -16,7 +16,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="结束时间" width="180">
+        <el-table-column label="结束时间" min-width="15%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -24,13 +24,13 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="开设课程数" prop="courseCnt" width="180"/>
-        <el-table-column label="开设班级数" prop="classCnt" width="100"/>
-        <el-table-column align="right" width="360">
+        <el-table-column label="开设课程数" prop="courseCnt" min-width="10%"/>
+        <el-table-column label="开设班级数" prop="classCnt" min-width="10%"/>
+        <el-table-column align="right" min-width="25%">
           <template #header>
-            <el-input v-model="search" style="width:200px" placeholder="Type to search" />
+            <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
             &nbsp;
-            <el-button @click="form.dialogVisible = true">新增学期</el-button>
+            <el-button @click="form.dialogVisible = true; handleNew()">新增学期</el-button>
             <el-dialog v-model="form.dialogVisible" title="新增学期" width="33%" append-to-body = "true">
               <el-form label-width="90px">
                 <el-form-item label="学期名：">
@@ -53,15 +53,41 @@
                 </el-form-item>
               </el-form>
               <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="form.dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveTerm()">确认</el-button>
-      </span>
+                <span class="dialog-footer">
+                  <el-button @click="form.dialogVisible = false">取消</el-button>
+                  <el-button type="primary" @click="saveTerm()">确认</el-button>
+                </span>
               </template>
             </el-dialog>
           </template>
           <template #default="scope">
-            <el-button @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+            <el-button @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
+            <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="修改学期信息" width="33%" append-to-body = "true">
+              <el-form label-width="90px">
+                <el-form-item label="学期名：">{{form.init}}</el-form-item>
+                <el-form-item label="始末日期：">
+                  <div class="block">
+                    <el-date-picker
+                        v-model="form.timeValue"
+                        type="daterange"
+                        unlink-panels
+                        range-separator="-"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        value-format='YYYY-MM-DD'
+                        :shortcuts="shortcuts"
+                        size="default"
+                    />
+                  </div>
+                </el-form-item>
+              </el-form>
+              <template #footer>
+                <span class="dialog-footer">
+                  <el-button @click="form.changeDialogVisible[scope.$index] = false">取消</el-button>
+                  <el-button type="primary" @click="saveTerm(scope.$index, scope.row)">确认</el-button>
+                </span>
+              </template>
+            </el-dialog>
             <el-popconfirm
                 confirm-button-text="是"
                 confirm-button-type="danger"
@@ -103,41 +129,54 @@ interface Term {
 const cancelEvent = () => {
   console.log('cancel!')
 }
-const search = ref('')
-// const filterTableData = computed(() =>
-//     tableData.value.filter(
-//         (data: { name: string; }) =>
-//             !search.value ||
-//             (data.name.toLowerCase().includes(search.value.toLowerCase()))
-//     )
-//
-// )
+
 const form = reactive({
   dialogVisible : false,
+  changeDialogVisible : [false],
   submitData: {},
   title : "新增学期",
   init : '',
-  timeValue:'',
+  timeValue:[],
+  isUpdate: false,
+  url:'',
+  search:''
 })
-
-const term =reactive<Term>({
-  name: '',
-  dateList:[],
-  courseCnt: 0n,
-  classCnt: 0n,
-})
-const saveTerm = () =>{
+// const term =reactive<Term>({
+//   name: '',
+//   dateList:[],
+//   courseCnt: 0n,
+//   classCnt: 0n,
+// })
+const saveTerm = (index: number, row: Term) =>{
   const data = {
     name: form.init,
     dateList: form.timeValue
   };
-  if (form.timeValue == ''){
+
+  if (!form.isUpdate){
+    form.url = '/term/saveTerm'
+  }else {
+    form.url = '/term/updateTerm'
+  }
+  if (form.timeValue.length == 0){
     ElMessage.error("学期始末时间不能为空")
-  }else{
-    axios.post('/term/saveTerm', data).then(res =>{
+  }else {
+    axios.post(form.url, data).then(res =>{
       if (res.data.code == 200){
-        ElMessage.success("新增成功");
-        form.dialogVisible = false
+        if (!form.isUpdate) {
+          ElMessage.success("新增成功");
+          form.dialogVisible = false
+        }
+        else{
+          ElMessage.success("更新成功");
+          form.changeDialogVisible[index] = false
+        }
+        const searchData = {
+          query : form.search
+        }
+        axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
+          tableData.value = (re.data.data)
+        })
       }else{
         ElMessage.error(res.data.message)
         console.log(res.data.message)
@@ -146,43 +185,58 @@ const saveTerm = () =>{
   }
   console.log(form.timeValue)
 }
+const inputChange = () => {
+  const searchData = {
+    query : form.search
+  }
+    axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
+      tableData.value = (re.data.data)
+    })
+}
+const handleNew = () => {
+  form.init = ''
+  form.timeValue = []
+  form.isUpdate = false
+}
 const handleEdit = (index: number, row: Term) => {
+  form.init = row.name
+  form.timeValue = row.dateList
+  form.isUpdate = true
   console.log(index, row)
 }
 const handleDelete = (index: number, row: Term) => {
+  const data = {
+    term: row.name
+  };
+  axios.post('/term/deleteTerm', data).then(re => {
+    if (re.data.code == 200){
+      ElMessage.success('删除成功')
+      const searchData = {
+        query : form.search
+      }
+      axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
+        tableData.value = (re.data.data)
+      })
+    }else {
+      ElMessage.error(re.data.message)
+    }
+  })
   console.log(index, row)
 }
 
 let tableData = ref<Term>()
-// let tableData :Term[] = []
 watch(
 
     () => router.currentRoute.value.path,
 
     (newValue, oldValue) => {
 
-      console.log("watch=5", newValue);
-      //  tableData = [
-      //   {
-      //     date: '2016-05-03',
-      //     name: 'Tom',
-      //     address: 'No. 189, Grove St, Los Angeles',
-      //   },
-      //   {
-      //     date: '2016-05-02',
-      //     name: 'John',
-      //     address: 'No. 189, Grove St, Los Angeles',
-      //   },
-      //   {
-      //     date: '2016-05-04',
-      //     name: 'Morgan',
-      //     address: 'No. 189, Grove St, Los Angeles',
-      //   },
-      //
-      // ]
-      axios.get('/term/getTermDataList').then(re =>{
-        tableData.value = (re.data.data)
-      })
+      const searchData = {
+        query : form.search
+      }
+        axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
+          tableData.value = (re.data.data)
+        })
     },
 
     { immediate: true }
