@@ -20,7 +20,7 @@
 					<span class="btn-bell-badge" v-if="message"></span>
 				</div>
 				<!-- 用户头像 -->
-				<el-avatar class="user-avator" :size="30" :src="imgurl" />
+				<el-avatar class="user-avator" :size="30" :src="form.imgUrl" />
 				<!-- 用户名下拉菜单 -->
 				<el-dropdown class="user-name" trigger="click" @command="handleCommand">
 					<span class="el-dropdown-link">
@@ -41,14 +41,14 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import {onMounted, reactive} from 'vue';
 import { useSidebarStore } from '../store/sidebar';
 import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.jpg';
 import axios from "axios";
 import {ElMessage} from "element-plus";
 
-const username: string | null = localStorage.getItem('ms_username');
+const username: string | null = localStorage.getItem('username');
 const message: number = 2;
 
 const sidebar = useSidebarStore();
@@ -63,6 +63,9 @@ onMounted(() => {
 	}
 });
 
+const form = reactive({
+  imgUrl : localStorage.getItem('img')
+})
 // 用户名下拉菜单选择事件
 const router = useRouter();
 const handleCommand = (command: string) => {
