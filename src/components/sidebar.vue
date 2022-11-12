@@ -54,7 +54,6 @@
 import { computed } from 'vue';
 import { useSidebarStore } from '../store/sidebar';
 import { useRoute } from 'vue-router';
-
 const items = [
 	{
 		icon: 'Odometer',
@@ -172,6 +171,11 @@ const items = [
     index: '/enrollTeach',
     title: '报名授课',
     permiss: 'enrollTeach'
+  }, {
+    icon: 'Calendar',
+    index: '/courseManager',
+    title: '课程管理',
+    permiss: 'courseManager'
   }, {
     icon: 'PieChart',
     index: '/termManager',

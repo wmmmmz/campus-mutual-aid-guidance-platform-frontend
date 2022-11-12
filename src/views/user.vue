@@ -102,9 +102,9 @@ import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
 import axios from "axios";
-import {useRouter} from "vue-router";
+import {useRoute} from "vue-router";
 import { ElMessage } from 'element-plus';
-
+import router from "../router";
 const stuId = localStorage.getItem('stuId');
 const className = localStorage.getItem('className');
 let telephone = localStorage.getItem('telephone');
@@ -122,7 +122,7 @@ const form = reactive({
   imgSrc: localStorage.getItem('img'),
   copyImg:''
 });
-const router = useRouter();
+// const router = useRouter();
 const onSubmit = () => {
   const data = {
     stuId: stuId,
