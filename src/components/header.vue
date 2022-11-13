@@ -12,12 +12,12 @@
 				<div class="btn-bell" @click="router.push('/tabs')">
 					<el-tooltip
 						effect="dark"
-						:content="message ? `有${message}条未读消息` : `消息中心`"
+						:content="form.message ? `有${form.message}条未读消息` : `消息中心`"
 						placement="bottom"
 					>
 						<i class="el-icon-lx-notice"></i>
 					</el-tooltip>
-					<span class="btn-bell-badge" v-if="message"></span>
+					<span class="btn-bell-badge" v-if="form.message"></span>
 				</div>
 				<!-- 用户头像 -->
 				<el-avatar class="user-avator" :size="30" :src="form.imgUrl" />
@@ -41,15 +41,14 @@
 	</div>
 </template>
 <script setup lang="ts">
-import {onMounted, reactive} from 'vue';
+import {onMounted, reactive, watch} from 'vue';
 import { useSidebarStore } from '../store/sidebar';
 import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.jpg';
 import axios from "axios";
 import {ElMessage} from "element-plus";
 
-const username: string | null = localStorage.getItem('username');
-const message: number = 2;
+let username: string | null = localStorage.getItem('username');
 
 const sidebar = useSidebarStore();
 // 侧边栏折叠
@@ -64,7 +63,8 @@ onMounted(() => {
 });
 
 const form = reactive({
-  imgUrl : localStorage.getItem('img')
+  imgUrl : localStorage.getItem('img'),
+  message : 0
 })
 // 用户名下拉菜单选择事件
 const router = useRouter();
@@ -85,6 +85,48 @@ const handleCommand = (command: string) => {
 		router.push('/user');
 	}
 };
+interface Notify{
+  title:string
+  content:string
+  createTime:''
+  status:string
+}
+const getNotifyList = () => {
+  const data = {
+    stuId : localStorage.getItem('stuId'),
+    role: localStorage.getItem('role'),
+  }
+  axios.get('/user/getNotifyList', {params:data}).then(re => {
+    if (re.data.code == 200){
+      const unReadList = re.data.data["UNREADED"] as Array<Notify>
+      if(unReadList == undefined){
+        form.message = 0
+      }else{
+        form.message = unReadList.length
+      }
+
+    }
+  })
+}
+const changeUserInfo = () => {
+  username = localStorage.getItem('username')
+  form.imgUrl = localStorage.getItem('img')
+}
+onMounted(() =>{
+  window.addEventListener('mousemove', getNotifyList)
+  window.addEventListener('mousemove', changeUserInfo)
+})
+watch(
+
+    () => router.currentRoute.value.path,
+
+    (newValue, oldValue) => {
+      getNotifyList()
+    },
+
+    { immediate: true }
+
+);
 </script>
 <style scoped>
 .header {

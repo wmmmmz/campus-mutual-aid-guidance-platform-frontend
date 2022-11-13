@@ -89,18 +89,9 @@ const cancelEvent = () => {
 
 const form = reactive({
   dialogVisible : false,
-  changeDialogVisible : [false],
-  submitData: {},
-  title : "新增学期",
-  init : '',
-  isUpdate: false,
-  url:'',
-  search:'',
   theme:'',
   carouselDialogVisible:false,
   ImageUrl:'' ,
-  disabled :false,
-  uploadImageUrl:'',
 })
 const themeData = [
   {
