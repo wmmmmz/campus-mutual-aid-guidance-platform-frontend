@@ -181,6 +181,11 @@ const items = [
     index: '/termManager',
     title: '学期管理',
     permiss: 'termManager'
+  }, {
+    icon: 'PieChart',
+    index: '/carouselChartManager',
+    title: '轮播图管理',
+    permiss: 'carouselChartManager'
   }
 ];
 

@@ -186,6 +186,14 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'termManager'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/termManager.vue')
+            }, {
+                path: '/carouselChartManager',
+                name: 'carouselChartManager',
+                meta: {
+                    title: '轮播图管理',
+                    permiss: 'carouselChartManager'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/carouselChartManager.vue')
             }
         ]
     }, {
