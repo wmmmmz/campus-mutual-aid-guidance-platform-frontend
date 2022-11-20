@@ -12,12 +12,12 @@
 				<div class="btn-bell" @click="router.push('/tabs')">
 					<el-tooltip
 						effect="dark"
-						:content="form.message ? `有${form.message}条未读消息` : `消息中心`"
+						:content="unReadCnt.unReadCnt ? `有${unReadCnt.unReadCnt}条未读消息` : `消息中心`"
 						placement="bottom"
 					>
 						<i class="el-icon-lx-notice"></i>
 					</el-tooltip>
-					<span class="btn-bell-badge" v-if="form.message"></span>
+					<span class="btn-bell-badge" v-if="unReadCnt.unReadCnt"></span>
 				</div>
 				<!-- 用户头像 -->
 				<el-avatar class="user-avator" :size="30" :src="form.imgUrl" />
@@ -47,6 +47,7 @@ import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.jpg';
 import axios from "axios";
 import {ElMessage} from "element-plus";
+import {unReadCntStore} from "../store/unreadCnt";
 
 let username: string | null = localStorage.getItem('username');
 
@@ -61,7 +62,7 @@ onMounted(() => {
 		collapseChage();
 	}
 });
-
+const unReadCnt = unReadCntStore()
 const form = reactive({
   imgUrl : localStorage.getItem('img'),
   message : 0
@@ -113,7 +114,6 @@ const changeUserInfo = () => {
   form.imgUrl = localStorage.getItem('img')
 }
 onMounted(() =>{
-  window.addEventListener('mousemove', getNotifyList)
   window.addEventListener('mousemove', changeUserInfo)
 })
 watch(

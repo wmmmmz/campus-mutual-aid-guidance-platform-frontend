@@ -84,6 +84,7 @@ import router from "../router";
 import axios from "axios";
 import {ElMessage} from "element-plus";
 import initTextHooks from "wangeditor/dist/text/event-hooks";
+import {unReadCntStore} from "../store/unreadCnt";
 
 interface Notify{
   title:string
@@ -187,6 +188,7 @@ const clearRecycle = () => {
     }
   })
 };
+const unReadCntChange = unReadCntStore()
 const getNotifyList = () => {
   const data = {
     stuId : localStorage.getItem('stuId'),
@@ -201,7 +203,7 @@ const getNotifyList = () => {
       }else{
         form.unreadedCnt = unReadList.length
       }
-
+      unReadCntChange.handleUnReadCnt(form.unreadedCnt)
       READED.value = (re.data.data["READED"])
       const readList = re.data.data["READED"] as Array<Notify>
       if(readList == undefined){
@@ -209,7 +211,6 @@ const getNotifyList = () => {
       }else{
         form.readedCnt = readList.length
       }
-
 
       RECYCLE.value = (re.data.data["RECYCLE"])
       const recycleList = re.data.data["RECYCLE"] as Array<Notify>
