@@ -137,7 +137,7 @@
                   <el-tree-select v-model="form.courseChoose" style="width:205px" :data="courseData" :render-after-expand="false" />
                 </el-form-item>
                 <el-form-item label="每周：">
-                  <el-tree-select v-model="form.dayChoose" style="width:205px" :data="dayData" :render-after-expand="false" />
+                  <el-tree-select v-model="form.dayChoose" style="width:205px" :data="dayData" @change="changeDayInEdit(scope.row)" :render-after-expand="false" />
                 </el-form-item>
                 <el-form-item label="始末时间：">
                   <div class="block">
@@ -148,7 +148,7 @@
                         start-placeholder="开始时间"
                         end-placeholder="结束时间"
                         value-format='HH:mm:ss'
-                        @change="changeTime()"
+                        @change="changeTimeInEdit(scope.row)"
                     />
                   </div>
                 </el-form-item>
@@ -179,7 +179,7 @@
               </el-form>
               <template #footer>
                 <span class="dialog-footer">
-                  <el-button @click="form.changeDialogVisible[scope.$index] = false">取消</el-button>
+                  <el-button @click="form.changeDialogVisible[scope.$index] = false, clearForm()">取消</el-button>
                   <el-button type="primary" @click="saveClass(scope.$index, scope.row)">确认</el-button>
                 </span>
               </template>
@@ -314,6 +314,7 @@ const saveClass = (index: number, row: Class) =>{
         form.changeDialogVisible[index] = false
       }
       getClassDataList()
+      clearForm()
     }else{
       ElMessage.error(res.data.message)
     }
@@ -322,8 +323,17 @@ const saveClass = (index: number, row: Class) =>{
 const inputChange = () => {
   getClassDataList()
 }
-const handleNew = () => {
+const clearForm = () => {
   form.isUpdate = false
+  form.className = ''
+  form.onlineNumber = ''
+  form.teacherChoose = ''
+  form.dayChoose = ''
+  form.time = []
+  form.courseChoose = ''
+}
+const handleNew = () => {
+  clearForm()
 }
 const handleEdit = (index: number, row: Class) => {
   form.isUpdate = true
@@ -333,6 +343,7 @@ const handleEdit = (index: number, row: Class) => {
   form.dayChoose = row.day
   form.time = row.dateList
   form.courseChoose = row.courseName
+  getFreeRoomData(row.className)
 }
 const handleDelete = (index: number, row: Class) => {
   const data = {
@@ -366,13 +377,19 @@ let tableData = ref<Class>()
 const changeTerm = () => {
   getClassDataList()
   getCourseData()
-  getFreeRoomData()
+  getFreeRoomData("")
 }
 const changeTime = () => {
-  getFreeRoomData()
+  getFreeRoomData("")
 }
 const changeDay = () => {
-  getFreeRoomData()
+  getFreeRoomData("")
+}
+const changeTimeInEdit = (row : Class) => {
+  getFreeRoomData(row.className)
+}
+const changeDayInEdit = (row : Class) => {
+  getFreeRoomData(row.className)
 }
 const getClassDataList = () => {
   const data = {
@@ -403,18 +420,27 @@ const getCourseData = () => {
     }
   })
 }
-
-const getFreeRoomData = () => {
+const getFreeRoomData = (className : string) => {
   const data = {
     start:form.time[0],
     end:form.time[1],
     termName:form.termChoose,
-    day:form.dayChoose
+    day:form.dayChoose,
+    className:className
   }
 
   axios.get('/room/getFreeRoomByTerm', {params:data}).then(re => {
     if (re.data.code == 200){
       roomData.value = re.data.data
+      let roomExist = false
+      re.data.data.forEach((room: any) => {
+        if (room.label == form.onlineNumber){
+          roomExist = true
+        }
+      })
+      if (!roomExist){
+        form.onlineNumber = ''
+      }
     }
   })
 }
@@ -430,7 +456,7 @@ watch(
       getTermToday()
       getCourseData()
       getClassDataList()
-      getFreeRoomData()
+      getFreeRoomData("")
     },
 
     { immediate: true }
