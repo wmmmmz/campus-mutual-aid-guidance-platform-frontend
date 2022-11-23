@@ -168,9 +168,20 @@ const items = [
     permiss: 'iTeach'
   }, {
     icon: 'DocumentCopy',
-    index: '/enrollTeach',
+    index: '/2',
     title: '报名授课',
-    permiss: 'enrollTeach'
+    permiss: 'enrollTeach',
+    subs: [
+        {
+        index: '/myTeachEnroll',
+        title: '我的报名',
+        permiss: 'enrollTeach',
+      },{
+        index: '/enrollTeach',
+        title: '可报名列表',
+        permiss: 'enrollTeach',
+      }
+    ]
   }, {
     icon: 'Calendar',
     index: '/courseManager',

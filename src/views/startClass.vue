@@ -92,7 +92,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="上课地点" prop="classroom" min-width="17%"/>
+        <el-table-column label="上课地点" prop="classroom" min-width="14%"/>
         <el-table-column label="授课老师" min-width="10%">
           <template #default="scope">
             <el-popover effect="light" trigger="hover" placement="top" width="auto">
@@ -107,13 +107,16 @@
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="学生数" prop="studentCnt" min-width="10%"/>
+        <el-table-column label="学生数" prop="studentCnt" min-width="8%"/>
         <el-table-column
             prop="status"
             label="状态"
-            width="100"
+            min-width="10%"
             :filters="[
-        { text: '流程中', value: '流程中' },
+        { text: '招募导生中', value: '招募导生中' },
+        { text: '学生报名中', value: '学生报名中' },
+        { text: '招募导生完成', value: '招募导生完成' },
+        { text: '学生报名截止', value: '学生报名截止' },
         { text: '已开班', value: '已开班' },
       ]"
             :filter-method="filterTag"
@@ -121,7 +124,7 @@
         >
           <template #default="scope">
             <el-tag
-                :type="scope.row.status === '流程中' ? '' : 'success'"
+                :type="scope.row.status === '已开班' ? 'success' : ''"
                 disable-transitions
             >{{ scope.row.status }}</el-tag
             >

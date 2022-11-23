@@ -166,7 +166,7 @@ const routes:RouteRecordRaw[] = [
                 path: '/enrollTeach',
                 name: 'enrollTeach',
                 meta: {
-                    title: '报名授课',
+                    title: '我的报名',
                     permiss: 'enrollTeach'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollTeach.vue')
@@ -194,6 +194,14 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'carouselChartManager'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/carouselChartManager.vue')
+            }, {
+                path: '/myTeachEnroll',
+                name: 'myTeachEnroll',
+                meta: {
+                    title: '我的报名',
+                    permiss: 'enrollTeach'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/myTeachEnroll.vue')
             }
         ]
     }, {
