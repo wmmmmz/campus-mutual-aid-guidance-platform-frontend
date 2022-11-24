@@ -27,12 +27,14 @@
           </template>
         </el-table-column>
         <el-table-column label="上课地点" prop="classroom" min-width="17%"/>
-        <el-table-column align="right" min-width="19%">
+        <el-table-column align="right" min-width="43%">
           <template #header>
+            <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+            &nbsp;
             <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
           </template>
             <template #default="scope">
-            <el-button @click="form.changeDialogVisible[scope.$index] = true; handleEnroll()">报名授课</el-button>
+            <el-button @click="form.changeDialogVisible[scope.$index] = true; handleEnroll(scope.row)">报名授课</el-button>
 
           </template>
         </el-table-column>
@@ -96,22 +98,6 @@ const form = reactive({
   enrollClassCnt:0
 })
 
-const dayData = [
-  {value:'一'},
-  {value:'二'},
-  {value:'三'},
-  {value:'四'},
-  {value:'五'},
-  {value:'六'},
-  {value:'日'},
-]
-const teacherData = [
-  {value:'王萌哲'},
-  {value:'王萌哲'},
-]
-const filterTag = (value: string, row: Class) => {
-  return row.status === value
-}
 interface courseDataList{
   value:string,
   label:string
@@ -167,15 +153,29 @@ const clearForm = () => {
   form.time = []
   form.courseChoose = ''
 }
-const handleEnroll = () => {
-  ElNotification({
-    title: '报名成功',
-    message: '您可至\'我的报名\'查看报名进度',
-    type: 'success',
+const handleEnroll = (row : Class) => {
+  const data = {
+    stuId:localStorage.getItem('stuId'),
+    role:localStorage.getItem('role'),
+    termName:form.termChoose,
+    className:row.className
+  }
+  axios.post('/teachEnroll/saveTeachEnroll', data).then(re => {
+    if (re.data.code == 200){
+      ElNotification({
+        title: '报名成功',
+        message: '您可至\'我的报名\'查看报名进度',
+        type: 'success',
+      })
+    }else{
+      ElNotification({
+        title: '报名失败',
+        message: re.data.message,
+        type: 'error',
+      })
+    }
   })
-}
-const handleNew = () => {
-  clearForm()
+
 }
 const handleEdit = (index: number, row: Class) => {
   form.isUpdate = true
@@ -185,7 +185,6 @@ const handleEdit = (index: number, row: Class) => {
   form.dayChoose = row.day
   form.time = row.dateList
   form.courseChoose = row.courseName
-  getFreeRoomData(row.className)
 }
 const handleDelete = (index: number, row: Class) => {
   const data = {
@@ -218,20 +217,6 @@ const getTermToday = () => {
 let tableData = ref<Class>()
 const changeTerm = () => {
   getClassDataList()
-  getCourseData()
-  getFreeRoomData("")
-}
-const changeTime = () => {
-  getFreeRoomData("")
-}
-const changeDay = () => {
-  getFreeRoomData("")
-}
-const changeTimeInEdit = (row : Class) => {
-  getFreeRoomData(row.className)
-}
-const changeDayInEdit = (row : Class) => {
-  getFreeRoomData(row.className)
 }
 const getClassDataList = () => {
   const data = {
@@ -252,40 +237,6 @@ const getClassDataList = () => {
   })
 }
 
-const getCourseData = () => {
-  const data = {
-    termName:form.termChoose
-  }
-  axios.get('/course/getCourseByTerm', {params:data}).then(re => {
-    if (re.data.code == 200){
-      courseData.value = re.data.data
-    }
-  })
-}
-const getFreeRoomData = (className : string) => {
-  const data = {
-    start:form.time[0],
-    end:form.time[1],
-    termName:form.termChoose,
-    day:form.dayChoose,
-    className:className
-  }
-
-  axios.get('/room/getFreeRoomByTerm', {params:data}).then(re => {
-    if (re.data.code == 200){
-      roomData.value = re.data.data
-      let roomExist = false
-      re.data.data.forEach((room: any) => {
-        if (room.label == form.onlineNumber){
-          roomExist = true
-        }
-      })
-      if (!roomExist){
-        form.onlineNumber = ''
-      }
-    }
-  })
-}
 watch(
 
     () => router.currentRoute.value.path,
@@ -296,9 +247,7 @@ watch(
         termData.value = re.data.data
       })
       getTermToday()
-      getCourseData()
       getClassDataList()
-      getFreeRoomData("")
     },
 
     { immediate: true }
