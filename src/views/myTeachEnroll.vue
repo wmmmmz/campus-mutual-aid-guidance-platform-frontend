@@ -13,7 +13,7 @@
       <i class="el-icon-lx-search"></i>&nbsp;
       <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
       <br><br>
-    <el-collapse v-model="activeNames" @change="handleChange">
+    <el-collapse v-model="form.activeNames" @change="handleChange">
       <div v-for="(data, key) in tableData">
       <el-collapse-item :name="key">
         <template #title>
@@ -76,35 +76,6 @@ interface TeachEnroll{
   status:''
 }
 const tableData = ref<TeachEnroll>()
-const mockData = [
-    {
-      title:"JAVA1",
-      className:"JAVA1",
-      courseName:"JAVA",
-      day:"一",
-      startTime:"20:00:00",
-      endTime:"21:00:00",
-      classroom:"观雪楼",
-      active:1,
-      enrollDate:"2022.10.11",
-      interviewDate:"2022.11.1",
-      successDate:"2022.12.1",
-      interviewLink:"http://www.baidu.com"
-  },{
-    title:"JAVA2",
-    className:"JAVA2",
-    courseName:"JAVA",
-    day:"二",
-    startTime:"20:00:00",
-    endTime:"21:00:00",
-    classroom:"腾讯会议",
-    active:2,
-    enrollDate:"2022.10.10",
-    interviewDate:"2022.11.1",
-    successDate:"2022.12.1",
-    interviewLink:"https://meeting.tencent.com/user-center/joining?meeting_code=679224987"
-  }
-]
 let termData = ref<termNameList>()
 interface termNameList{
   value: string
@@ -113,9 +84,9 @@ interface termNameList{
 const form = reactive({
   termChoose:'',
   termToday:'',
-  search:''
+  search:'',
+  activeNames:[]
 })
-const activeNames = ref([])
 const handleChange = (val: string[]) => {
   console.log(val)
 }
@@ -151,6 +122,7 @@ const inputChange = () => {
 }
 const changeTerm = () => {
   getTeachEnrollDataList()
+  form.activeNames = []
 }
 watch(
 
