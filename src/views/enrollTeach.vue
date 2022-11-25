@@ -34,7 +34,7 @@
             <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
           </template>
             <template #default="scope">
-            <el-button @click="form.changeDialogVisible[scope.$index] = true; handleEnroll(scope.row)">报名授课</el-button>
+            <el-button @click="form.changeDialogVisible[scope.$index] = true; handleEnroll(scope.row)" >报名授课</el-button>
 
           </template>
         </el-table-column>

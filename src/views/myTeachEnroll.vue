@@ -7,14 +7,25 @@
           <h2>我的报名授课进度</h2>
         </div>
       </template>
+      <i class="el-icon-lx-calendar"></i>&nbsp;
+      <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+      &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <i class="el-icon-lx-search"></i>&nbsp;
+      <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
+      <br><br>
     <el-collapse v-model="activeNames" @change="handleChange">
-      <div v-for="(data, key) in mockData">
+      <div v-for="(data, key) in tableData">
       <el-collapse-item :name="key">
         <template #title>
-            <p class="collapse-title">{{data.title}}</p>
+            <p class="collapse-title">{{data.className}}</p>
+          <el-tag  class="ml-2" v-if="data.status == '成为导生'" type="success">{{ data.status }}</el-tag>
+          <el-tag  v-else-if="data.status == '安排面试'">{{ data.status }}</el-tag>
+          <el-tag  class="ml-2" v-else-if="data.status == '报名成功'" type="warning">{{ data.status }}</el-tag>
+          <el-tag  class="ml-2" v-else-if="data.status == '流程终止'" type="info">{{ data.status }}</el-tag>
+          &nbsp;
         </template>
-        <div style="float: right;text-align: right;width:100%;">
-          <el-link @click="interviewLink(data.interviewLink)" type="primary" v-if="data.active == 2">面试链接</el-link>
+        <div style="float: right;text-align: right;width:90%;">
+          <el-link  @click="interviewLink(data.interviewLink)" type="primary" v-if="data.active == 2">面试链接</el-link>
           <br v-if="data.active != 2">
         </div>
         <div>
@@ -29,9 +40,9 @@
         </div>
         <br>
         <div>
-          <el-steps :active="data.active" finish-status="success">
+          <el-steps :active="data.active" finish-status="success" align-center space="40%">
             <el-step title="报名成功" :description="data.enrollDate" :icon="Document" />
-            <el-step title="面试中" :description="data.interviewDate" :icon="User" />
+            <el-step title="安排面试" :description="data.interviewDate" :icon="User" />
             <el-step title="成为导生" :description="data.successDate" :icon="Check" />
           </el-steps>
         </div>
@@ -50,7 +61,21 @@ import {ElMessage} from "element-plus";
 import { Document, User, Check } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate} from "vue-router";
 import router from "../router";
-
+interface TeachEnroll{
+  className: string
+  classroom: string
+  day : string
+  startTime:'',
+  endTime:'',
+  courseName:string,
+  interviewLink:'',
+  enrollDate:'',
+  interviewDate:'',
+  successDate:'',
+  active:1,
+  status:''
+}
+const tableData = ref<TeachEnroll>()
 const mockData = [
     {
       title:"JAVA1",
@@ -80,7 +105,16 @@ const mockData = [
     interviewLink:"https://meeting.tencent.com/user-center/joining?meeting_code=679224987"
   }
 ]
-
+let termData = ref<termNameList>()
+interface termNameList{
+  value: string
+  label: string
+}
+const form = reactive({
+  termChoose:'',
+  termToday:'',
+  search:''
+})
 const activeNames = ref([])
 const handleChange = (val: string[]) => {
   console.log(val)
@@ -88,12 +122,46 @@ const handleChange = (val: string[]) => {
 const interviewLink = (link : string) => {
   window.open(link);
 }
+const getTermToday = () => {
+  axios.get('/term/getTermToday').then(re => {
+    if (re.data.code == 200){
+      form.termToday = re.data.data
+      form.termChoose = form.termToday
+    }
+    else
+      form.termToday = '学期不存在'
+  })
+  console.log(form.termChoose)
+  return form.termToday
+}
+const getTeachEnrollDataList = () => {
+  const data = {
+    query: form.search,
+    termName : form.termChoose,
+    stuId : localStorage.getItem('stuId')
+  }
+  axios.get('/teachEnroll/getTeachEnrollDataList', {params:data}).then(re => {
+    if (re.data.code == 200){
+      tableData.value = re.data.data
+    }
+  })
+}
+const inputChange = () => {
+  getTeachEnrollDataList()
+}
+const changeTerm = () => {
+  getTeachEnrollDataList()
+}
 watch(
 
     () => router.currentRoute.value.path,
 
     (newValue, oldValue) => {
-
+      axios.get('/term/getAllTerm').then(re => {
+        termData.value = re.data.data
+      })
+      getTeachEnrollDataList()
+      getTermToday()
     },
 
     { immediate: true }
