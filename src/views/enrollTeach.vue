@@ -34,8 +34,29 @@
             <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
           </template>
             <template #default="scope">
-            <el-button @click="form.changeDialogVisible[scope.$index] = true; handleEnroll(scope.row)" >报名授课</el-button>
+            <el-button @click="checkEnroll(scope.row, scope.$index)" >报名授课</el-button>
+              <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="报名授课" width="33%" append-to-body = "true">
+                <el-form label-width="90px">
+                  <el-form-item label="班级名：">{{scope.row.className}}</el-form-item>
+                  <el-form-item label="上传简历：">
+                    <el-upload class="upload-demo" drag action="" :before-upload="BeforeUpload"
+                               :http-request="Upload">
+                      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+                      <div class="el-upload__text">
+                        将文件拖到此处，或
+                        <em>点击上传</em>
+                      </div>
+                    </el-upload>
 
+                  </el-form-item>
+                </el-form>
+                <template #footer>
+                <span class="dialog-footer">
+                  <el-button @click="form.changeDialogVisible[scope.$index] = false">取消</el-button>
+                  <el-button type="primary" @click="handleEnroll(scope.row, scope.$index)">确认</el-button>
+                </span>
+                </template>
+              </el-dialog>
           </template>
         </el-table-column>
       </el-table>
@@ -95,72 +116,63 @@ const form = reactive({
   className:'',
   teacherChoose:'',
   courseChoose:'',
-  enrollClassCnt:0
+  enrollClassCnt:0,
+  newFile:new FormData(),
+  tempFilePath:'',
+  suffixName:''
 })
-
-interface courseDataList{
-  value:string,
-  label:string
-}
-interface roomDataList{
-  value:string,
-  label:string
-}
-let courseData = ref<courseDataList>()
-let roomData = ref<roomDataList>()
-const saveClass = (index: number, row: Class) =>{
+const checkEnroll = (row : Class, index : number) => {
   const data = {
-    className: form.className,
-    teacherName: form.teacherChoose,
-    classroom: form.onlineNumber,
-    day : form.dayChoose,
-    dateList:form.time,
+    stuId: localStorage.getItem('stuId'),
     termName:form.termChoose,
-    courseName:form.courseChoose,
-  };
-
-  if (!form.isUpdate){
-    form.url = '/class/saveClass'
-  }else {
-    form.url = '/class/updateClass'
+    className:row.className
   }
-  axios.post(form.url, data).then(res =>{
-    if (res.data.code == 200){
-      if (!form.isUpdate) {
-        ElMessage.success("新增成功");
-        form.dialogVisible = false
-      }
-      else{
-        ElMessage.success("更新成功");
-        form.changeDialogVisible[index] = false
-      }
-      getClassDataList()
-      clearForm()
+  axios.post('/teachEnroll/checkEnroll', data).then(re => {
+    if (re.data.code == 200){
+      form.changeDialogVisible[index] = true
     }else{
-      ElMessage.error(res.data.message)
+      ElNotification({
+        title: '报名失败',
+        message: re.data.message,
+        type: 'error',
+      })
     }
   })
 }
+const BeforeUpload = (file : any) => {
+  if(file){
+    form.newFile.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
+    console.log(form.newFile.get('file'))
+  }else{
+    return false;
+  }
+}
+const Upload = () => {
+  axios.post('/nginx/uploadByAction', form.newFile).then(re => {
+    if (re.data.code == 200) {
+      form.tempFilePath = re.data.data.path
+      form.suffixName = re.data.data.suffixName
+    }else {
+      ElMessage.error(re.data.message)
+    }
+  })
+}
+
 const inputChange = () => {
   getClassDataList()
 }
-const clearForm = () => {
-  form.isUpdate = false
-  form.className = ''
-  form.onlineNumber = ''
-  form.teacherChoose = ''
-  form.dayChoose = ''
-  form.time = []
-  form.courseChoose = ''
-}
-const handleEnroll = (row : Class) => {
+const handleEnroll = (row : Class, index : number) => {
   const data = {
     stuId:localStorage.getItem('stuId'),
     role:localStorage.getItem('role'),
     termName:form.termChoose,
-    className:row.className
+    className:row.className,
+    filePath: form.tempFilePath,
+    suffixName: form.suffixName
   }
   axios.post('/teachEnroll/saveTeachEnroll', data).then(re => {
+    form.changeDialogVisible[index] = false
+    form.tempFilePath = ''
     if (re.data.code == 200){
       ElNotification({
         title: '报名成功',
@@ -176,29 +188,6 @@ const handleEnroll = (row : Class) => {
     }
   })
 
-}
-const handleEdit = (index: number, row: Class) => {
-  form.isUpdate = true
-  form.className = row.className
-  form.onlineNumber = row.classroom
-  form.teacherChoose = row.teacherName
-  form.dayChoose = row.day
-  form.time = row.dateList
-  form.courseChoose = row.courseName
-}
-const handleDelete = (index: number, row: Class) => {
-  const data = {
-    className: row.className,
-    termName : form.termChoose
-  };
-  axios.post('/class/deleteClass', data).then(re => {
-    if (re.data.code == 200){
-      ElMessage.success('删除成功')
-      getClassDataList()
-    }else {
-      ElMessage.error(re.data.message)
-    }
-  })
 }
 let termData = ref<termNameList>()
 

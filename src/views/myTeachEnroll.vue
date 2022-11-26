@@ -26,6 +26,8 @@
         </template>
         <div style="float: right;text-align: right;width:90%;">
           <el-link  @click="interviewLink(data.interviewLink)" type="primary" v-if="data.active == 2">面试链接</el-link>
+          &nbsp;
+          <el-link type="primary" v-if="data.resumeUrl.length != 0" @click="downloadFileByBase64(data.resumeUrl, '个人简历')">下载简历</el-link>
           <br v-if="data.active != 2">
         </div>
         <div>
@@ -73,7 +75,8 @@ interface TeachEnroll{
   interviewDate:'',
   successDate:'',
   active:1,
-  status:''
+  status:'',
+  resumeUrl: ''
 }
 const tableData = ref<TeachEnroll>()
 let termData = ref<termNameList>()
@@ -124,6 +127,33 @@ const changeTerm = () => {
   getTeachEnrollDataList()
   form.activeNames = []
 }
+
+const dataURLtoBlob = (dataurl : any) => {
+  let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
+
+const downloadFile = (url : string, name : string) => {
+  const a = document.createElement("a")
+  a.setAttribute("href",url)
+  a.setAttribute("download",name)
+  a.setAttribute("target","_blank")
+  let clickEvent = document.createEvent("MouseEvents");
+  clickEvent.initEvent("click", true, true);
+  a.dispatchEvent(clickEvent);
+}
+
+const downloadFileByBase64 = (base64 : string ,name : string) => {
+  console.log(base64)
+  const myBlob = dataURLtoBlob(base64)
+  const myUrl = URL.createObjectURL(myBlob)
+  downloadFile(myUrl,name)
+}
+
 watch(
 
     () => router.currentRoute.value.path,
