@@ -46,8 +46,10 @@
                         将文件拖到此处，或
                         <em>点击上传</em>
                       </div>
+                      <template #tip>
+                        <div class="el-upload__tip">支持上传 .doc/.docx/.pdf 文件</div>
+                      </template>
                     </el-upload>
-
                   </el-form-item>
                 </el-form>
                 <template #footer>
@@ -72,9 +74,6 @@ import {ElMessage, ElNotification} from "element-plus";
 import { InfoFilled } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import router from "../router";
-
-// const router = useRoute();
-
 interface Class {
   className: string
   teacherName: string

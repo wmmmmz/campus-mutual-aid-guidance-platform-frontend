@@ -27,7 +27,7 @@
         <div style="float: right;text-align: right;width:90%;">
           <el-link  @click="interviewLink(data.interviewLink)" type="primary" v-if="data.active == 2">面试链接</el-link>
           &nbsp;
-          <el-link type="primary" v-if="data.resumeUrl.length != 0" @click="downloadFileByBase64(data.resumeUrl, '个人简历')">下载简历</el-link>
+          <el-link type="primary" v-if="data.resumeUrl.length != 0" @click="downloadFileByBase64(data.resumeUrl, form.termChoose + '_' + data.className + '_个人简历' )">下载简历</el-link>
           <br v-if="data.active != 2">
         </div>
         <div>
