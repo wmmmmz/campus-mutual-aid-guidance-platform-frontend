@@ -77,7 +77,6 @@
                 <el-form-item label="报名学生：">{{scope.row.studentName}}</el-form-item>
                 <el-form-item label="授课班级：">{{scope.row.className}}</el-form-item>
                 <el-form-item label="报名状态：">
-<!--                  <el-tree-select v-model="form.statusChoose" style="width:205px" :data="statusData" :render-after-expand="false"/>-->
                   <el-select v-model="form.statusChoose">
                     <el-option
                         v-for="item in statusData"
