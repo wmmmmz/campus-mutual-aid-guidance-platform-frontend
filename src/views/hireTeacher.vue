@@ -107,6 +107,9 @@
                 <el-form-item v-if="form.statusChoose == '成为导生'" class="blueItem" label="提示：">
                   <p style="color: #2d8cf0">系统将自动为该同学创建导生账号，并发送提醒通知</p>
                 </el-form-item>
+                <el-form-item v-if="form.statusChoose == '面试通过'" class="blueItem" label="提示：">
+                  <p style="color: #2d8cf0">系统将自动向该同学发送确认offer通知<br>请关注 我的消息 查看学生选择结果。</p>
+                </el-form-item>
               </el-form>
               <template #footer>
                 <span class="dialog-footer">
@@ -166,6 +169,7 @@ const interviewLink = (link : string) => {
 let statusData = [
   {value:'报名成功', disabled:false},
   {value:'安排面试', disabled:false},
+  {value:'面试通过', disabled:false},
   {value:'成为导生', disabled:false},
   {value:'流程终止', disabled:false},
 ]
@@ -206,7 +210,7 @@ const handleChange = (row : TeachEnroll) => {
     })
   }else if(form.statusChoose == '成为导生'){
     statusData.forEach((stats : any) => {
-      if (stats.value == '报名成功' || stats.value == '安排面试')
+      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '流程终止')
         stats.disabled = true
       console.log(stats.value+ stats.disabled)
     })
@@ -238,6 +242,34 @@ const handleEnroll = (row : TeachEnroll, index : number) => {
   }
   if (form.statusChoose == '安排面试'){
     axios.post('/teachEnroll/updateStatusToArrangeInterview', data).then(re => {
+      if (re.data.code == 200){
+        ElNotification({
+          title: '修改状态成功',
+          message: '系统将自动给该学生发送面试流程更新通知',
+          type: 'success',
+        })
+        form.changeDialogVisible[index] = false
+        getTeachEnrollDataList()
+      }else {
+        ElMessage.error(re.data.message)
+      }
+    })
+  }else if (form.statusChoose == '成为导生'){
+    axios.post('/teachEnroll/updateStatusToHired', data).then(re => {
+      if (re.data.code == 200){
+        ElNotification({
+          title: '修改状态成功',
+          message: '系统将自动给该学生发送面试流程更新通知',
+          type: 'success',
+        })
+        form.changeDialogVisible[index] = false
+        getTeachEnrollDataList()
+      }else {
+        ElMessage.error(re.data.message)
+      }
+    })
+  }else if (form.statusChoose == '面试通过'){
+    axios.post('/teachEnroll/updateStatusToPassed', data).then(re => {
       if (re.data.code == 200){
         ElNotification({
           title: '修改状态成功',

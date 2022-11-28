@@ -20,6 +20,7 @@
             <p class="collapse-title">{{data.className}}</p>
           <el-tag  class="ml-2" v-if="data.status == '成为导生'" type="success">{{ data.status }}</el-tag>
           <el-tag  v-else-if="data.status == '安排面试'">{{ data.status }}</el-tag>
+          <el-tag  v-else-if="data.status == '面试通过'" type="success">{{ data.status }}</el-tag>
           <el-tag  class="ml-2" v-else-if="data.status == '报名成功'" type="warning">{{ data.status }}</el-tag>
           <el-tag  class="ml-2" v-else-if="data.status == '流程终止'" type="info">{{ data.status }}</el-tag>
           &nbsp;
@@ -27,8 +28,25 @@
         <div style="float: right;text-align: right;width:90%;">
           <el-link  @click="interviewLink(data.interviewLink)" type="primary" v-if="data.active == 2">面试链接</el-link>
           &nbsp;
+          <el-link @click="acceptOffer(data.className)" v-if="data.active == 3" type="primary">接收Offer</el-link>
+          &nbsp;
+          <el-link @click="form.dialogVisible[key] = true" v-if="data.active == 3" type="info">拒绝Offer</el-link>
+          <el-dialog v-model="form.dialogVisible[key]" title="拒绝Offer" width="33%" append-to-body = "true">
+            <el-form label-width="90px">
+              <el-form-item label="原因：">
+                <el-input type="text" v-model="form.refuseReason"></el-input>
+              </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                  <el-button @click="form.dialogVisible[key] = false">取消</el-button>
+                  <el-button type="primary" @click="saveReason(data.className, key)">确认</el-button>
+                </span>
+            </template>
+          </el-dialog>
+          &nbsp;
           <el-link type="primary" v-if="data.resumeUrl.length != 0" @click="downloadFileByBase64(data.resumeUrl, form.termChoose + '_' + data.className + '_个人简历' )">下载简历</el-link>
-          <br v-if="data.active != 2">
+          <br v-if="data.active != 2 && data.active != 3">
         </div>
         <div>
           <el-descriptions>
@@ -45,7 +63,8 @@
           <el-steps :active="data.active" finish-status="success" align-center space="40%">
             <el-step title="报名成功" :description="data.enrollDate" :icon="Document" />
             <el-step title="安排面试" :description="data.interviewDate" :icon="User" />
-            <el-step title="成为导生" :description="data.successDate" :icon="Check" />
+            <el-step title="面试通过" :description="data.passDate" :icon="Check" />
+            <el-step title="成为导生" :description="data.successDate" :icon="Finished" />
           </el-steps>
         </div>
       </el-collapse-item>
@@ -59,8 +78,8 @@
 <script lang="ts" setup>
 import {computed, createApp, onMounted, reactive, ref, watch} from 'vue'
 import axios from "axios";
-import {ElMessage} from "element-plus";
-import { Document, User, Check } from '@element-plus/icons-vue'
+import {ElMessage, ElNotification} from "element-plus";
+import { Document, User, Check, Finished } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate} from "vue-router";
 import router from "../router";
 interface TeachEnroll{
@@ -76,7 +95,8 @@ interface TeachEnroll{
   successDate:'',
   active:1,
   status:'',
-  resumeUrl: ''
+  resumeUrl: '',
+  passDate:''
 }
 const tableData = ref<TeachEnroll>()
 let termData = ref<termNameList>()
@@ -88,13 +108,36 @@ const form = reactive({
   termChoose:'',
   termToday:'',
   search:'',
-  activeNames:[]
+  activeNames:[],
+  refuseReason:'',
+  dialogVisible:[false]
 })
 const handleChange = (val: string[]) => {
   console.log(val)
 }
 const interviewLink = (link : string) => {
   window.open(link);
+}
+const saveReason = (className : string, key : number) => {
+  const data = {
+    termName:form.termChoose,
+    className:className,
+    studentName: localStorage.getItem('username'),
+    reason : form.refuseReason
+  }
+  axios.post('/teachEnroll/updateStatusToInterrupted', data).then(re => {
+    if (re.data.code == 200){
+      ElNotification({
+        title: '拒绝Offer成功',
+        message: '',
+        type: 'success',
+      })
+      form.dialogVisible[key] = false
+      getTeachEnrollDataList()
+    }else {
+      ElMessage.error(re.data.message)
+    }
+  })
 }
 const getTermToday = () => {
   axios.get('/term/getTermToday').then(re => {
@@ -154,6 +197,25 @@ const downloadFileByBase64 = (base64 : string ,name : string) => {
   downloadFile(myUrl,name)
 }
 
+const acceptOffer = (className : string) => {
+  const data = {
+    termName:form.termChoose,
+    className:className,
+    studentName: localStorage.getItem('username'),
+  }
+  axios.post('/teachEnroll/updateStatusToHired', data).then(re => {
+    if (re.data.code == 200){
+      ElNotification({
+        title: '接收Offer成功',
+        message: '请关注后续开班通知\n若您为初次成为导生，系统将自动为您创建导生账号\n请至 我的消息 查看具体账号信息',
+        type: 'success',
+      })
+      getTeachEnrollDataList()
+    }else {
+      ElMessage.error(re.data.message)
+    }
+  })
+}
 watch(
 
     () => router.currentRoute.value.path,
