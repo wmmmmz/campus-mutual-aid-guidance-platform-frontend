@@ -23,6 +23,7 @@
           <el-tag  v-else-if="data.status == '面试通过'" type="success">{{ data.status }}</el-tag>
           <el-tag  class="ml-2" v-else-if="data.status == '报名成功'" type="warning">{{ data.status }}</el-tag>
           <el-tag  class="ml-2" v-else-if="data.status == '流程终止'" type="info">{{ data.status }}</el-tag>
+          <el-tag  class="ml-2" v-else-if="data.status == '流程中断'" type="info">{{ data.status }}</el-tag>
           &nbsp;
         </template>
         <div style="float: right;text-align: right;width:90%;">
@@ -123,7 +124,8 @@ const saveReason = (className : string, key : number) => {
     termName:form.termChoose,
     className:className,
     studentName: localStorage.getItem('username'),
-    reason : form.refuseReason
+    reason : form.refuseReason,
+    fromAdmin: false
   }
   axios.post('/teachEnroll/updateStatusToInterrupted', data).then(re => {
     if (re.data.code == 200){

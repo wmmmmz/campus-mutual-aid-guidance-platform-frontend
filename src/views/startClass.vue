@@ -75,8 +75,8 @@
       <el-table :data="tableData" style="width: 100%">
         <el-table-column label="班级名" prop="className" min-width="7%"/>
         <el-table-column label="课程名" prop="courseName" min-width="7%"/>
-        <el-table-column label="每周" prop="day" min-width="7%"/>
-        <el-table-column label="开始时间" min-width="15%">
+        <el-table-column label="每周" prop="day" min-width="5%"/>
+        <el-table-column label="开始时间" min-width="11%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -84,7 +84,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="结束时间" min-width="15%">
+        <el-table-column label="结束时间" min-width="11%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -92,8 +92,8 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="上课地点" prop="classroom" min-width="14%"/>
-        <el-table-column label="授课老师" min-width="10%">
+        <el-table-column label="上课地点" prop="classroom" min-width="8%"/>
+        <el-table-column label="授课老师" min-width="8%">
           <template #default="scope">
             <el-popover effect="light" trigger="hover" placement="top" width="auto">
               <template #default>
@@ -107,11 +107,11 @@
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="学生数" prop="studentCnt" min-width="8%"/>
+        <el-table-column label="学生数" prop="studentCnt" min-width="6%"/>
         <el-table-column
             prop="status"
-            label="状态"
-            min-width="10%"
+            label="开班状态"
+            min-width="11%"
             :filters="[
         { text: '招募导生中', value: '招募导生中' },
         { text: '学生报名中', value: '学生报名中' },
@@ -130,8 +130,11 @@
             >
           </template>
         </el-table-column>
-        <el-table-column align="right" min-width="19%">
+        <el-table-column align="right" min-width="25%">
           <template #default="scope">
+            <el-button v-if="scope.row.status == '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始招募学生</el-button>
+            <el-button v-if="scope.row.status == '招募学生中'" @click="changeStatus(scope.row, '招募学生完成')">停止招募学生</el-button>
+            <el-button v-if="scope.row.status == '招募学生完成'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
             <el-button v-if="scope.row.status != '已开班'" @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
             <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="修改班级信息" width="37%" append-to-body = "true">
               <el-form label-width="90px">
@@ -320,6 +323,21 @@ const saveClass = (index: number, row: Class) =>{
       clearForm()
     }else{
       ElMessage.error(res.data.message)
+    }
+  })
+}
+const changeStatus = (row : Class, status : string) => {
+  const data = {
+    className: row.className,
+    termName : form.termChoose,
+    status : status
+  }
+  axios.post('/class/changeStatus', data).then(re => {
+    if (re.data.code == 200){
+      ElMessage.success('修改状态成功')
+      getClassDataList()
+    }else {
+      ElMessage.error(re.data.message)
     }
   })
 }

@@ -110,6 +110,9 @@
                 <el-form-item v-if="form.statusChoose == '面试通过'" class="blueItem" label="提示：">
                   <p style="color: #2d8cf0">系统将自动向该同学发送确认offer通知<br>请关注 我的消息 查看学生选择结果。</p>
                 </el-form-item>
+                <el-form-item v-if="form.statusChoose == '流程中断'" label="原因：">
+                  <el-input v-model="form.reason" style="width: 260px" placeholder="请输入流程中断原因"></el-input>
+                </el-form-item>
               </el-form>
               <template #footer>
                 <span class="dialog-footer">
@@ -171,6 +174,7 @@ let statusData = [
   {value:'安排面试', disabled:false},
   {value:'面试通过', disabled:false},
   {value:'成为导生', disabled:false},
+  {value:'流程中断', disabled:false},
   {value:'流程终止', disabled:false},
 ]
 const form = reactive({
@@ -196,7 +200,8 @@ const form = reactive({
   tempFilePath:'',
   suffixName:'',
   statusChoose:'',
-  interViewUrl:''
+  interViewUrl:'',
+  reason:''
 })
 const handleChange = (row : TeachEnroll) => {
   statusData.forEach((stats : any) => {
@@ -208,15 +213,20 @@ const handleChange = (row : TeachEnroll) => {
       if (stats.value == '报名成功')
       stats.disabled = true
     })
+  }else if (form.statusChoose == '面试通过'){
+    statusData.forEach((stats : any) => {
+      if (stats.value == '报名成功' || stats.value == '安排面试')
+        stats.disabled = true
+    })
   }else if(form.statusChoose == '成为导生'){
     statusData.forEach((stats : any) => {
-      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '流程终止')
+      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '流程终止' || stats.value == '面试通过')
         stats.disabled = true
-      console.log(stats.value+ stats.disabled)
     })
   }else if(form.statusChoose == '流程终止'){
     statusData.forEach((stats : any) => {
-      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '成为导生')
+      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '面试通过' || stats.value == '成为导生'
+          || stats.value == '流程中断')
         stats.disabled = true
     })
   }
@@ -238,7 +248,9 @@ const handleEnroll = (row : TeachEnroll, index : number) => {
     studentName: row.studentName,
     interviewLink : form.interViewUrl,
     startTime : form.time[0],
-    endTime: form.time[1]
+    endTime: form.time[1],
+    reason: form.reason,
+    fromAdmin: true
   }
   if (form.statusChoose == '安排面试'){
     axios.post('/teachEnroll/updateStatusToArrangeInterview', data).then(re => {
@@ -270,6 +282,20 @@ const handleEnroll = (row : TeachEnroll, index : number) => {
     })
   }else if (form.statusChoose == '面试通过'){
     axios.post('/teachEnroll/updateStatusToPassed', data).then(re => {
+      if (re.data.code == 200){
+        ElNotification({
+          title: '修改状态成功',
+          message: '系统将自动给该学生发送面试流程更新通知',
+          type: 'success',
+        })
+        form.changeDialogVisible[index] = false
+        getTeachEnrollDataList()
+      }else {
+        ElMessage.error(re.data.message)
+      }
+    })
+  }else if (form.statusChoose == '流程中断'){
+    axios.post('/teachEnroll/updateStatusToInterrupted', data).then(re => {
       if (re.data.code == 200){
         ElNotification({
           title: '修改状态成功',
