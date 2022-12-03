@@ -3,14 +3,22 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>{{form.termChoose}} 可报名上课班级数：{{form.enrollClassCnt}}</h2>
+          <h2>{{form.termChoose}} 已报名上课班级数：{{form.classCnt}}</h2>
         </div>
       </template>
+      <div>
+        <i class="el-icon-lx-calendar"></i>&nbsp;
+        <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+        &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <i class="el-icon-lx-search"></i>&nbsp;
+        <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
+      </div>
+      &nbsp;<br>
       <el-table :data="tableData" style="width: 100%">
         <el-table-column label="班级名" prop="className" min-width="7%"/>
         <el-table-column label="课程名" prop="courseName" min-width="7%"/>
-        <el-table-column label="每周" prop="day" min-width="7%"/>
-        <el-table-column label="开始时间" min-width="15%">
+        <el-table-column label="每周" prop="day" min-width="5%"/>
+        <el-table-column label="开始时间" min-width="11%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -18,7 +26,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="结束时间" min-width="15%">
+        <el-table-column label="结束时间" min-width="11%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -26,8 +34,14 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="上课地点" prop="classroom" min-width="10%"/>
-        <el-table-column label="授课老师" min-width="10%">
+        <el-table-column label="上课地点" min-width="8%">
+          <template #default="scope">
+          <el-link type="primary" v-if="scope.row.classroom == '腾讯会议'" @click="classroomLink(scope.row.tencentMeetingUrl)">{{ scope.row.classroom }}</el-link>
+          <el-link v-else>{{ scope.row.classroom }}</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="腾讯会议号" prop="tencentMeeting" min-width="10%"/>
+        <el-table-column label="授课老师" min-width="8%">
           <template #default="scope">
             <el-popover effect="light" trigger="hover" placement="top" width="auto">
               <template #default>
@@ -41,14 +55,44 @@
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column align="right" min-width="43%">
-          <template #header>
-            <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
-            &nbsp;
-            <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
-          </template>
+        <el-table-column label="学生数" prop="studentCnt" min-width="7%"/>
+        <el-table-column
+            prop="status"
+            label="开班状态"
+            min-width="11%"
+            :filters="[
+        { text: '学生报名中', value: '学生报名中' },
+        { text: '学生报名截止', value: '学生报名截止' },
+        { text: '已开班', value: '已开班' },
+      ]"
+            :filter-method="filterTag"
+            filter-placement="bottom-end"
+        >
           <template #default="scope">
-            <el-button @click="classEnroll(scope.row, scope.$index)" >报名上课</el-button>
+            <el-tag
+                :type="scope.row.status === '已开班' ? 'success' : ''"
+                disable-transitions
+            >{{ scope.row.status }}</el-tag
+            >
+          </template>
+        </el-table-column>
+        <el-table-column align="right" min-width="25%">
+          <template #default="scope">
+            <el-popconfirm
+                confirm-button-text="是"
+                confirm-button-type="danger"
+                cancel-button-text="否"
+                :icon="InfoFilled"
+                icon-color="#ff0000"
+                title="确定取消报名吗"
+                @confirm="handleDelete(scope.$index, scope.row)"
+                @cancel="cancelEvent"
+                v-if="scope.row.status != '已开班'"
+            >
+              <template #reference>
+                <el-button type="danger">取消报名</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -60,10 +104,12 @@
 <script lang="ts" setup>
 import {computed, createApp, onMounted, reactive, ref, watch} from 'vue'
 import axios from "axios";
-import {ElMessage, ElNotification} from "element-plus";
+import {ElMessage} from "element-plus";
 import { InfoFilled } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import router from "../router";
+
+
 interface Class {
   className: string
   teacherName: string
@@ -76,7 +122,9 @@ interface Class {
   dateList:[]
   isOnline:string
   status:string
-  courseName:string
+  courseName:string,
+  tencentMeeting:string,
+  tencentMeetingUrl:string
 }
 
 interface termNameList{
@@ -105,82 +153,31 @@ const form = reactive({
   className:'',
   teacherChoose:'',
   courseChoose:'',
-  enrollClassCnt:0,
-  newFile:new FormData(),
-  tempFilePath:'',
-  suffixName:''
+  classCnt:0
 })
-const classEnroll = (row : Class, index : number) => {
+const filterTag = (value: string, row: Class) => {
+  return row.status === value
+}
+const inputChange = () => {
+  getClassDataList()
+}
+const classroomLink = (link : string) => {
+  window.open(link);
+}
+const handleDelete = (index: number, row: Class) => {
   const data = {
-    stuId: localStorage.getItem('stuId'),
-    termName:form.termChoose,
-    className:row.className
-  }
-  axios.post('/classEnroll/saveEnroll', data).then(re => {
+    className: row.className,
+    termName : form.termChoose,
+    stuId: localStorage.getItem('stuId')
+  };
+  axios.post('/classEnroll/deleteClassEnroll', data).then(re => {
     if (re.data.code == 200){
-      ElNotification({
-        title: '报名成功',
-        message: '请在 我的报名 中关注开班信息',
-        type: 'success',
-      })
-    }else{
-      ElNotification({
-        title: '报名失败',
-        message: re.data.message,
-        type: 'error',
-      })
-    }
-  })
-}
-const BeforeUpload = (file : any) => {
-  if(file){
-    form.newFile.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
-    console.log(form.newFile.get('file'))
-  }else{
-    return false;
-  }
-}
-const Upload = () => {
-  axios.post('/nginx/uploadByAction', form.newFile).then(re => {
-    if (re.data.code == 200) {
-      form.tempFilePath = re.data.data.path
-      form.suffixName = re.data.data.suffixName
+      ElMessage.success('删除成功')
+      getClassDataList()
     }else {
       ElMessage.error(re.data.message)
     }
   })
-}
-
-const inputChange = () => {
-  getClassDataList()
-}
-const handleEnroll = (row : Class, index : number) => {
-  const data = {
-    stuId:localStorage.getItem('stuId'),
-    role:localStorage.getItem('role'),
-    termName:form.termChoose,
-    className:row.className,
-    filePath: form.tempFilePath,
-    suffixName: form.suffixName
-  }
-  axios.post('/teachEnroll/saveTeachEnroll', data).then(re => {
-    form.changeDialogVisible[index] = false
-    form.tempFilePath = ''
-    if (re.data.code == 200){
-      ElNotification({
-        title: '报名成功',
-        message: '您可至\'我的报名\'查看报名进度',
-        type: 'success',
-      })
-    }else{
-      ElNotification({
-        title: '报名失败',
-        message: re.data.message,
-        type: 'error',
-      })
-    }
-  })
-
 }
 let termData = ref<termNameList>()
 
@@ -204,21 +201,20 @@ const getClassDataList = () => {
   const data = {
     termName: form.termChoose,
     query: form.search,
-    status: '招募学生中'
+    stuId: localStorage.getItem('stuId')
   }
-  axios.get('/class/getClassByStatus', {params:data}).then(re => {
+  axios.get('/classEnroll/getClassEnrollDataList', {params:data}).then(re => {
     if (re.data.code == 200){
       tableData.value = re.data.data
-      const enrollClassCnt = re.data.data as Array<Class>
-      if (enrollClassCnt == undefined){
-        form.enrollClassCnt = 0
+      const classCnt = re.data.data as Array<Class>
+      if (classCnt == undefined){
+        form.classCnt = 0
       }else {
-        form.enrollClassCnt = enrollClassCnt.length
+        form.classCnt = classCnt.length
       }
     }
   })
 }
-
 watch(
 
     () => router.currentRoute.value.path,

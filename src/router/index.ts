@@ -131,14 +131,6 @@ const routes:RouteRecordRaw[] = [
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/startClass.vue')
             }, {
-                path: '/enrollClass',
-                name: 'enrollClass',
-                meta: {
-                    title: '报名上课',
-                    permiss: 'enrollClass'
-                },
-                component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollClass.vue')
-            }, {
                 path: '/iLearn',
                 name: 'iLearn',
                 meta: {
@@ -202,6 +194,22 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'enrollTeach'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/myTeachEnroll.vue')
+            }, {
+                path: '/myClassEnroll',
+                name: 'myClassEnroll',
+                meta: {
+                    title: '我的报名',
+                    permiss: 'enrollClass'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/myClassEnroll.vue')
+            }, {
+                path: '/enrollClass',
+                name: 'enrollClass',
+                meta: {
+                    title: '可报名列表',
+                    permiss: 'enrollClass'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollClass.vue')
             }
         ]
     }, {

@@ -133,8 +133,8 @@
         <el-table-column align="right" min-width="25%">
           <template #default="scope">
             <el-button v-if="scope.row.status == '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始招募学生</el-button>
-            <el-button v-if="scope.row.status == '招募学生中'" @click="changeStatus(scope.row, '招募学生完成')">停止招募学生</el-button>
-            <el-button v-if="scope.row.status == '招募学生完成'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
+            <el-button v-if="scope.row.status == '招募学生中'" @click="changeStatus(scope.row, '学生报名截止')">停止招募学生</el-button>
+            <el-button v-if="scope.row.status == '学生报名截止'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
             <el-button v-if="scope.row.status != '已开班'" @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
             <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="修改班级信息" width="37%" append-to-body = "true">
               <el-form label-width="90px">

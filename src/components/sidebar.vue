@@ -147,11 +147,6 @@ const items = [
     title: '开班管理',
     permiss: 'startClass'
   }, {
-    icon: 'DocumentCopy',
-    index: '/enrollClass',
-    title: '报名上课',
-    permiss: 'enrollClass'
-  }, {
     icon: 'Calendar',
     index: '/iLearn',
     title: '我的课程',
@@ -168,7 +163,7 @@ const items = [
     permiss: 'iTeach'
   }, {
     icon: 'DocumentCopy',
-    index: '/2',
+    index: '/enrollTeach',
     title: '报名授课',
     permiss: 'enrollTeach',
     subs: [
@@ -197,6 +192,22 @@ const items = [
     index: '/carouselChartManager',
     title: '轮播图管理',
     permiss: 'carouselChartManager'
+  }, {
+    icon: 'DocumentCopy',
+    index: '/enrollClass',
+    title: '报名上课',
+    permiss: 'enrollClass',
+    subs: [
+      {
+        index: '/myClassEnroll',
+        title: '我的报名',
+        permiss: 'enrollClass',
+      },{
+        index: '/enrollClass',
+        title: '可报名列表',
+        permiss: 'enrollClass',
+      }
+    ]
   }
 ];
 
