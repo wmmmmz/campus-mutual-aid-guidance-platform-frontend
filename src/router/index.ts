@@ -51,15 +51,7 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'myMessage'
                 },
                 component: () => import ( /* webpackChunkName: "tabs" */ "../views/tabs.vue")
-            }, {
-                path: "/donate",
-                name: "donate",
-                meta: {
-                    title: '鼓励作者',
-                    permiss: '14'
-                },
-                component: () => import ( /* webpackChunkName: "donate" */ "../views/donate.vue")
-            }, {
+            },{
                 path: "/permission",
                 name: "permission",
                 meta: {

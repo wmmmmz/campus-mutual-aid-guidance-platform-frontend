@@ -73,14 +73,33 @@
       </div>
       &nbsp;<br>
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column label="班级名" prop="className" min-width="7%"/>
-        <el-table-column label="课程名" prop="courseName" min-width="7%"/>
-        <el-table-column label="每周" prop="day" min-width="5%"/>
-        <el-table-column label="开始时间" min-width="11%">
+        <el-table-column type="expand">
+          <template #default="props">
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="el-icon-lx-friend"></i>&nbsp;
+          <span style="font-size: small">学生列表</span>
+          <br>&nbsp;
+            <el-table :data="props.row.studentList" border style="width: 80%;margin: auto">
+              <el-table-column label="学生姓名" prop="name" min-width="10%"/>
+              <el-table-column label="学号" prop="stuId" min-width="15%" />
+              <el-table-column label="班级" prop="className" min-width="15%" />
+              <el-table-column label="手机号" prop="tel" min-width="15%" />
+              <el-table-column label="微信" prop="wx" min-width="15%" />
+            </el-table>
+          <br>
+          </template>
+        </el-table-column>
+        <el-table-column label="班级名" prop="name" min-width="7%" />
+        <el-table-column label="课程名" min-width="7%" >
+          <template #default="scope">
+            <p>{{scope.row.course.name}}</p>
+          </template>
+        </el-table-column>
+        <el-table-column label="每周" prop="day" min-width="5%" />
+        <el-table-column label="开始时间" min-width="11%" >
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
-              <span style="margin-left: 10px">{{ scope.row.dateList[0] }}</span>
+              <span style="margin-left: 10px">{{ scope.row.startTime }}</span>
             </div>
           </template>
         </el-table-column>
@@ -88,26 +107,30 @@
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
-              <span style="margin-left: 10px">{{ scope.row.dateList[1] }}</span>
+              <span style="margin-left: 10px">{{ scope.row.endTime }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="上课地点" prop="classroom" min-width="8%"/>
-        <el-table-column label="授课老师" min-width="8%">
+        <el-table-column label="上课地点" min-width="8%" >
+          <template #default="scope">
+            <p>{{scope.row.room.roomName}}</p>
+          </template>
+        </el-table-column>
+        <el-table-column label="授课老师" min-width="8%" >
           <template #default="scope">
             <el-popover effect="light" trigger="hover" placement="top" width="auto">
               <template #default>
-                <div>班级: {{ scope.row.teacherClass }}</div>
-                <div>电话: {{ scope.row.teacherTel }}</div>
-                <div>微信: {{ scope.row.teacherWx }}</div>
+                <div v-if="scope.row.user">班级: {{ scope.row.user.className }}</div>
+                <div v-if="scope.row.user">电话: {{ scope.row.user.tel }}</div>
+                <div v-if="scope.row.user">微信: {{ scope.row.user.wx }}</div>
               </template>
               <template #reference>
-                <el-tag v-if="scope.row.teacherName">{{ scope.row.teacherName }}</el-tag>
+                <el-tag v-if="scope.row.user">{{ scope.row.user.name }}</el-tag>
               </template>
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="学生数" prop="studentCnt" min-width="6%"/>
+        <el-table-column label="学生数" prop="studentCnt" min-width="6%" />
         <el-table-column
             prop="status"
             label="开班状态"
@@ -132,10 +155,10 @@
         </el-table-column>
         <el-table-column align="right" min-width="25%">
           <template #default="scope">
-            <el-button v-if="scope.row.status == '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始招募学生</el-button>
-            <el-button v-if="scope.row.status == '招募学生中'" @click="changeStatus(scope.row, '学生报名截止')">停止招募学生</el-button>
-            <el-button v-if="scope.row.status == '学生报名截止'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
-            <el-button v-if="scope.row.status != '已开班'" @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
+            <el-button v-if="scope.row.status === '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始招募学生</el-button>
+            <el-button v-if="scope.row.status === '招募学生中'" @click="changeStatus(scope.row, '学生报名截止')">停止招募学生</el-button>
+            <el-button v-if="scope.row.status === '学生报名截止'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
+            <el-button v-if="scope.row.status !== '已开班'" @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
             <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="修改班级信息" width="37%" append-to-body = "true">
               <el-form label-width="90px">
                 <el-form-item label="班级名：">{{form.className}}</el-form-item>
@@ -222,22 +245,53 @@ import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import router from "../router";
 
 // const router = useRoute();
-
+const mockData = [
+  {
+    studentName:'wmz',
+    studentStuId:'20191112324',
+    studentClass:'19计科C2',
+    studentTel:'18918522833',
+    studentWx:'mengzhe_6721',
+  },{
+    studentName:'wmz',
+    studentStuId:'20191112324',
+    studentClass:'19计科C2',
+    studentTel:'18918522833',
+    studentWx:'mengzhe_6721',
+  }
+]
 interface Class {
-  className: string
+  name: string
   teacherName: string
   teacherClass:string
   teacherWx:string
   teacherTel:string
   classroom: string
   day : string
-  studentCnt:bigint
+  studentCnt:number
   dateList:[]
   isOnline:string
   status:string
-  courseName:string
+  courseName:string,
+  startTime:never,
+  endTime:never,
+  studentList:[],
+  course:Course,
+  room:Room,
+  user:User,
 }
-
+interface User{
+  name:string,
+  className:string,
+  tel:string,
+  wx:string
+}
+interface Course{
+  name:string
+}
+interface Room{
+  roomName:string
+}
 interface termNameList{
   value: string
   label: string
@@ -328,7 +382,7 @@ const saveClass = (index: number, row: Class) =>{
 }
 const changeStatus = (row : Class, status : string) => {
   const data = {
-    className: row.className,
+    className: row.name,
     termName : form.termChoose,
     status : status
   }
@@ -358,17 +412,19 @@ const handleNew = () => {
 }
 const handleEdit = (index: number, row: Class) => {
   form.isUpdate = true
-  form.className = row.className
-  form.onlineNumber = row.classroom
-  form.teacherChoose = row.teacherName
+  form.className = row.name
+  form.onlineNumber = row.room.roomName
+  if (row.user)
+    form.teacherChoose = row.user.name
   form.dayChoose = row.day
-  form.time = row.dateList
-  form.courseChoose = row.courseName
-  getFreeRoomData(row.className)
+  form.time[0] = row.startTime
+  form.time[1] = row.endTime
+  form.courseChoose = row.course.name
+  getFreeRoomData(row.name)
 }
 const handleDelete = (index: number, row: Class) => {
   const data = {
-    className: row.className,
+    className: row.name,
     termName : form.termChoose
   };
   axios.post('/class/deleteClass', data).then(re => {
@@ -407,10 +463,10 @@ const changeDay = () => {
   getFreeRoomData("")
 }
 const changeTimeInEdit = (row : Class) => {
-  getFreeRoomData(row.className)
+  getFreeRoomData(row.name)
 }
 const changeDayInEdit = (row : Class) => {
-  getFreeRoomData(row.className)
+  getFreeRoomData(row.name)
 }
 const getClassDataList = () => {
   const data = {
@@ -422,6 +478,10 @@ const getClassDataList = () => {
 
       tableData.value = re.data.data
       const classCnt = re.data.data as Array<Class>
+      classCnt.forEach((data =>{
+        const userList = data.studentList as Array<User>
+        data.studentCnt = userList.length
+      }))
       if (classCnt == undefined){
         form.classCnt = 0
       }else {

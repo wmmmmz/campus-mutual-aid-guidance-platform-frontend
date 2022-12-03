@@ -7,9 +7,9 @@
         </div>
       </template>
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column label="班级名" prop="className" min-width="7%"/>
+        <el-table-column label="班级名" prop="className" min-width="7%" />
         <el-table-column label="课程名" prop="courseName" min-width="7%"/>
-        <el-table-column label="每周" prop="day" min-width="7%"/>
+        <el-table-column label="每周" prop="day" min-width="7%" />
         <el-table-column label="开始时间" min-width="15%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
@@ -26,7 +26,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="上课地点" prop="classroom" min-width="10%"/>
+        <el-table-column label="上课地点" prop="classroom" min-width="10%" />
         <el-table-column label="授课老师" min-width="10%">
           <template #default="scope">
             <el-popover effect="light" trigger="hover" placement="top" width="auto">
