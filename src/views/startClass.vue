@@ -59,9 +59,9 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="授课老师：">
-              <el-tree-select v-model="form.teacherChoose" style="width:205px" :data="teacherData" :render-after-expand="false" />
-            </el-form-item>
+<!--            <el-form-item label="授课老师：">-->
+<!--              <el-tree-select v-model="form.teacherChoose" style="width:205px" :data="teacherData" :render-after-expand="false" />-->
+<!--            </el-form-item>-->
           </el-form>
           <template #footer>
                 <span class="dialog-footer">
@@ -155,8 +155,8 @@
         </el-table-column>
         <el-table-column align="right" min-width="25%">
           <template #default="scope">
-            <el-button v-if="scope.row.status === '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始招募学生</el-button>
-            <el-button v-if="scope.row.status === '招募学生中'" @click="changeStatus(scope.row, '学生报名截止')">停止招募学生</el-button>
+            <el-button v-if="scope.row.status === '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始学生报名</el-button>
+            <el-button v-if="scope.row.status === '学生报名中'" @click="changeStatus(scope.row, '学生报名截止')">结束学生报名</el-button>
             <el-button v-if="scope.row.status === '学生报名截止'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
             <el-button v-if="scope.row.status !== '已开班'" @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
             <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="修改班级信息" width="37%" append-to-body = "true">
@@ -239,7 +239,7 @@
 <script lang="ts" setup>
 import {computed, createApp, onMounted, reactive, ref, watch} from 'vue'
 import axios from "axios";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElNotification} from "element-plus";
 import { InfoFilled } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import router from "../router";
@@ -388,7 +388,15 @@ const changeStatus = (row : Class, status : string) => {
   }
   axios.post('/class/changeStatus', data).then(re => {
     if (re.data.code == 200){
-      ElMessage.success('修改状态成功')
+      if (status === '已开班'){
+        ElNotification({
+          title: '修改状态成功',
+          message: '系统将自动向该班级的导生和学生发送开班通知',
+          type: 'success',
+        })
+      }else{
+        ElMessage.success('修改状态成功')
+      }
       getClassDataList()
     }else {
       ElMessage.error(re.data.message)
