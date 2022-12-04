@@ -131,6 +131,14 @@ const routes:RouteRecordRaw[] = [
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/iLearn.vue')
             }, {
+                path: '/classDetails',
+                name: 'classDetails',
+                meta: {
+                    title: '课程详情',
+                    permiss: 'iLearn'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/classDetails.vue')
+            }, {
                 path: '/myInterview',
                 name: 'myInterview',
                 meta: {
@@ -146,6 +154,14 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'iTeach'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/iTeach.vue')
+            }, {
+                path: '/teachDetails',
+                name: 'teachDetails',
+                meta: {
+                    title: '课程详情',
+                    permiss: 'iTeach'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/teachDetails.vue')
             }, {
                 path: '/enrollTeach',
                 name: 'enrollTeach',

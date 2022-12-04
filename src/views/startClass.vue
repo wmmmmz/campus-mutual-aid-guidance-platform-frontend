@@ -471,7 +471,8 @@ const changeDayInEdit = (row : Class) => {
 const getClassDataList = () => {
   const data = {
     termName: form.termChoose,
-    query: form.search
+    query: form.search,
+    role: localStorage.getItem('role')
   }
   axios.get('/class/getClassDataList', {params:data}).then(re => {
     if (re.data.code == 200){

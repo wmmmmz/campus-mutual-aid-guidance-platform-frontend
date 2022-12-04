@@ -144,7 +144,18 @@ const items = [
     icon: 'Calendar',
     index: '/iLearn',
     title: '我的课程',
-    permiss: 'iLearn'
+    permiss: 'iLearn',
+    subs: [
+      {
+        index: '/iLearn',
+        title: '我的课表',
+        permiss: 'iLearn',
+      },{
+        index: '/classDetails',
+        title: '课程详情',
+        permiss: 'iLearn',
+      }
+    ]
   }, {
     icon: 'CoffeeCup',
     index: '/myInterview',
@@ -154,7 +165,18 @@ const items = [
     icon: 'Calendar',
     index: '/iTeach',
     title: '我教的课',
-    permiss: 'iTeach'
+    permiss: 'iTeach',
+    subs: [
+      {
+        index: '/iTeach',
+        title: '我的课表',
+        permiss: 'iTeach',
+      },{
+        index: '/teachDetails',
+        title: '课程详情',
+        permiss: 'iTeach',
+      }
+    ]
   }, {
     icon: 'DocumentCopy',
     index: '/enrollTeach',
