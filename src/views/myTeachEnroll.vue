@@ -1,5 +1,5 @@
 <template>
-
+  <div>
   <el-col :span="30">
     <el-card shadow="hover">
       <template #header>
@@ -73,6 +73,7 @@
     </el-collapse>
     </el-card>
   </el-col>
+  </div>
 </template>
 
 

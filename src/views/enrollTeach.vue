@@ -1,4 +1,5 @@
 <template>
+  <div>
   <el-col :span="30">
     <el-card shadow="hover">
       <template #header>
@@ -64,7 +65,7 @@
       </el-table>
     </el-card>
   </el-col>
-
+  </div>
 </template>
 
 <script lang="ts" setup>

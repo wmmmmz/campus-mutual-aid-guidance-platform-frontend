@@ -1,4 +1,5 @@
 <template>
+  <div>
   <el-col :span="30">
     <el-card shadow="hover">
       <template #header>
@@ -60,7 +61,7 @@
       </el-table>
     </el-card>
   </el-col>
-
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -111,8 +112,8 @@ const themeData = [
   },
   {
     //to student
-    value: '报名上课通知',
-    label: '报名上课通知',
+    value: '报名上课',
+    label: '报名上课',
   },{
     //to all
     value: '开班提醒',

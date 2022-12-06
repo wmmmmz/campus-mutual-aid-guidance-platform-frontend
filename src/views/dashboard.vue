@@ -2,53 +2,71 @@
   <div>
     <el-carousel v-if="imgData" :interval="3000"  type="card" height="28vw">
       <el-carousel-item  v-for="item in imgData" :key="item">
-        <!--        <h3 text="2xl" justify="center">{{ item }}</h3>-->
-        <img ref="image" style="width:100%; height: auto" :src="item.imgUrl" @click="routerChoose()"/>
+        <img ref="image" style="width:100%; height: auto" :src="item.imgUrl" @click="routerChoose(item.theme)"/>
       </el-carousel-item>
     </el-carousel>
+    <el-row :gutter="10" >
+      <el-col :span="12">
+        <el-card shadow="hover">
+          <template #header>
+              <h3>明星导生</h3>
+          </template>
+          <div>
+            <schart class="v-chart" canvasId="canvas" :options="form.options" align="center"/>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
-
 </template>
 
 <script lang="ts" setup>
-import {computed, createApp, onMounted, reactive, ref, watch} from 'vue'
+import {reactive, ref, watch} from 'vue'
 import axios from "axios";
-import {ElMessage} from "element-plus";
-import { InfoFilled } from '@element-plus/icons-vue'
-import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import router from "../router";
+import Schart from 'vue-schart';
+import Charts from "./charts.vue";
 
-// const router = useRoute();
 interface Img{
   theme:string
   imgUrl:string
   imgUrlList:[]
 }
-// let imgData = [
-//   {src : localStorage.getItem('img')},
-//   {src : localStorage.getItem('img')},
-//   {src : localStorage.getItem('img')},
-// ]
 const imgData = ref<Img>()
-const routerChoose = () => {
-  router.push('/user')
+const routerChoose = (theme : string) => {
+  if (theme === '招募导生' && (localStorage.getItem('role') === 'student' || localStorage.getItem('role') === 'teacher'))
+    router.push('/enrollTeach')
+  else if(theme === '报名上课' && localStorage.getItem('role') === 'student'){
+    router.push('/enrollClass')
+  }
 }
 
-
-onMounted(() => {
-  // 首次加载时,初始化高度
-  // form.screenWidth = window.innerHeight
-  // console.log(form.screenWidth)
-  // form.bannerHeight = 700 / 1000 * form.screenWidth - 50
-  // console.log(form.bannerHeight)
-  // 窗口大小发生改变
-
-
-})
 const form = reactive({
-  bannerHeight:700,
-  screenWidth:1920
-});
+  options : {
+    type: "bar",
+    // title: {
+    //   text: "明星导生"
+    // },
+    bgColor: "#ffffff",
+    labels: [],
+    rightPadding:10,
+    datasets: [
+      {
+        label: '导生授课数',
+        fillColor: "rgba(9,99,182,0.5)",
+        data: []
+      }
+    ]}
+})
+const getStarTeacher = () => {
+  axios.get('/class/getStarTeacher').then(re => {
+    if (re.data.code == 200){
+      form.options.labels = re.data.data['teacherName']
+      form.options.datasets[0].data = re.data.data['teachCnt']
+    }
+  })
+
+}
 watch(
 
     () => router.currentRoute.value.path,
@@ -57,33 +75,20 @@ watch(
       axios.get('/carousel/getAllCarousel').then(re => {
         imgData.value = re.data.data
       })
+      getStarTeacher()
     },
 
     { immediate: true }
 
 );
 
+
 </script>
 <style scoped>
-.demo-date-picker {
-  display: flex;
-  width: 100%;
-  padding: 0;
-  flex-wrap: wrap;
+
+.v-chart {
+  width: auto;
+  height: 400px;
 }
-.block  .demo-date-picker{
-  padding: 30px 0;
-  text-align: center;
-  border-right: solid 1px var(--el-border-color);
-  flex: 1;
-}
-.demo-date-picker .block:last-child {
-  border-right: none;
-}
-.demo-date-picker .demonstration {
-  display: block;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-  margin-bottom: 20px;
-}
+
 </style>

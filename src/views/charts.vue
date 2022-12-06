@@ -108,12 +108,8 @@ const options4 = {
 </script>
 
 <style scoped>
-.schart-box {
-	display: inline-block;
-	margin: 20px;
-}
 .schart {
-	width: 600px;
+	width: 300px;
 	height: 400px;
 }
 .content-title {
