@@ -62,12 +62,6 @@ const items = [
 		permiss: 'dashboard'
 	},
 	{
-		icon: 'Calendar',
-		index: '/table',
-		title: '基础表格',
-		permiss: '2'
-	},
-	{
 		icon: 'Message',
 		index: '/tabs',
 		title: '我的消息',
@@ -79,16 +73,6 @@ const items = [
 		title: '表单相关',
 		permiss: '4',
 		subs: [
-			{
-				index: '/form',
-				title: '基本表单',
-				permiss: '5'
-			},
-			{
-				index: '/upload',
-				title: '文件上传',
-				permiss: '6'
-			},
 			{
 				index: '4',
 				title: '三级菜单',
@@ -113,12 +97,6 @@ const items = [
 		index: '/icon',
 		title: '自定义图标',
 		permiss: '10'
-	},
-	{
-		icon: 'PieChart',
-		index: '/charts',
-		title: 'schart图表',
-		permiss: '11'
 	},
 	{
 		icon: 'Warning',
@@ -156,11 +134,6 @@ const items = [
         permiss: 'iLearn',
       }
     ]
-  }, {
-    icon: 'CoffeeCup',
-    index: '/myInterview',
-    title: '我的面试',
-    permiss: 'myInterview'
   }, {
     icon: 'Calendar',
     index: '/iTeach',

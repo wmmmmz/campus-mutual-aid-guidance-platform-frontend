@@ -20,30 +20,6 @@ const routes:RouteRecordRaw[] = [
                 },
                 component: () => import ( /* webpackChunkName: "dashboard" */ "../views/dashboard.vue")
             }, {
-                path: "/table",
-                name: "basetable",
-                meta: {
-                    title: '表格',
-                    permiss: '2'
-                },
-                component: () => import ( /* webpackChunkName: "table" */ "../views/table.vue")
-            }, {
-                path: "/charts",
-                name: "basecharts",
-                meta: {
-                    title: '图表',
-                    permiss: '11'
-                },
-                component: () => import ( /* webpackChunkName: "charts" */ "../views/charts.vue")
-            }, {
-                path: "/form",
-                name: "baseform",
-                meta: {
-                    title: '表单',
-                    permiss: '5'
-                },
-                component: () => import ( /* webpackChunkName: "form" */ "../views/form.vue")
-            }, {
                 path: "/tabs",
                 name: "tabs",
                 meta: {
@@ -59,15 +35,7 @@ const routes:RouteRecordRaw[] = [
                     permiss: '13'
                 },
                 component: () => import ( /* webpackChunkName: "permission" */ "../views/permission.vue")
-            }, {
-                path: "/upload",
-                name: "upload",
-                meta: {
-                    title: '上传插件',
-                    permiss: '6'
-                },
-                component: () => import ( /* webpackChunkName: "upload" */ "../views/upload.vue")
-            }, {
+            },{
                 path: "/icon",
                 name: "icon",
                 meta: {
@@ -138,14 +106,6 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'iLearn'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/classDetails.vue')
-            }, {
-                path: '/myInterview',
-                name: 'myInterview',
-                meta: {
-                    title: '我的面试',
-                    permiss: 'myInterview'
-                },
-                component: () => import (/* webpackChunkName: "markdown" */ '../views/myInterview.vue')
             }, {
                 path: '/iTeach',
                 name: 'iTeach',
