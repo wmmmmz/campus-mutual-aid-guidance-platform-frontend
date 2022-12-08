@@ -8,8 +8,8 @@
         </div>
       </template>
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column label="通知主题" prop="title" min-width="15%"/>
-        <el-table-column label="通知内容" prop="content" min-width="25%">
+        <el-table-column label="通知主题" prop="title" min-width="10%"/>
+        <el-table-column label="通知内容" prop="content" min-width="20%">
         </el-table-column>
         <el-table-column label="发布时间" min-width="20%">
           <template #default="scope">
@@ -17,6 +17,20 @@
               <el-icon><timer /></el-icon>
               <span style="margin-left: 10px">{{ scope.row.createTime }}</span>
             </div>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="form.role === 'admin'" label="发布人" min-width="10%">
+          <template #default="scope">
+            <el-popover effect="light" trigger="hover" placement="top" width="auto">
+              <template #default>
+                <div v-if="form.role === 'admin'">班级: {{ scope.row.senderClassName }}</div>
+                <div v-if="form.role === 'admin'">电话: {{ scope.row.senderTel }}</div>
+                <div v-if="form.role === 'admin'">微信: {{ scope.row.senderWx }}</div>
+              </template>
+              <template #reference>
+                <el-tag v-if="form.role === 'admin'">{{ scope.row.senderName }}</el-tag>
+              </template>
+            </el-popover>
           </template>
         </el-table-column>
         <el-table-column label="未读人数" prop="unreadCnt" min-width="10%"/>
@@ -90,7 +104,11 @@ interface Notify {
   title:string
   content:string
   createTime: undefined
-  unreadCnt:number
+  unreadCnt:number,
+  senderName:string,
+  senderClassName:string,
+  senderTel:string,
+  senderWx:string
   // readed: number,
 }
 
@@ -99,7 +117,8 @@ const form = reactive({
   search : '',
   title:'',
   content:'',
-  notifyIdentity:[]
+  notifyIdentity:[],
+  role :localStorage.getItem('role')
 })
 
 const saveNotify = () => {
