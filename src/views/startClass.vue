@@ -35,7 +35,7 @@
                     range-separator="-"
                     start-placeholder="开始时间"
                     end-placeholder="结束时间"
-                    value-format='HH:mm:ss'
+                    value-format='HH:mm'
                     @change="changeTime()"
                 />
               </div>
@@ -59,6 +59,9 @@
                   >
                 </el-option>
               </el-select>
+            </el-form-item>
+            <el-form-item label="学生上限：">
+              <el-input-number v-model="form.maxStudentCount" :min="1"/>
             </el-form-item>
 <!--            <el-form-item label="授课老师：">-->
 <!--              <el-tree-select v-model="form.teacherChoose" style="width:205px" :data="teacherData" :render-after-expand="false" />-->
@@ -96,7 +99,7 @@
           </template>
         </el-table-column>
         <el-table-column label="每周" prop="day" min-width="5%" />
-        <el-table-column label="开始时间" min-width="11%" >
+        <el-table-column label="开始时间" min-width="8%" >
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -104,7 +107,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="结束时间" min-width="11%">
+        <el-table-column label="结束时间" min-width="8%">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <el-icon><timer /></el-icon>
@@ -132,6 +135,7 @@
           </template>
         </el-table-column>
         <el-table-column label="学生数" prop="studentCnt" min-width="6%" />
+        <el-table-column label="学生上限" prop="maxStudentCount" min-width="8%" />
         <el-table-column
             prop="status"
             label="开班状态"
@@ -154,7 +158,7 @@
             >
           </template>
         </el-table-column>
-        <el-table-column align="right" min-width="25%">
+        <el-table-column align="right" min-width="26%">
           <template #default="scope">
             <el-button v-if="scope.row.status === '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始学生报名</el-button>
             <el-button v-if="scope.row.status === '学生报名中'" @click="changeStatus(scope.row, '学生报名截止')">结束学生报名</el-button>
@@ -177,7 +181,7 @@
                         range-separator="-"
                         start-placeholder="开始时间"
                         end-placeholder="结束时间"
-                        value-format='HH:mm:ss'
+                        value-format='HH:mm'
                         @change="changeTimeInEdit(scope.row)"
                     />
                   </div>
@@ -206,6 +210,9 @@
                   <el-tree-select v-model="form.teacherChoose" style="width:205px" :data="teacherData" :render-after-expand="false" />
                 </el-form-item>
                 <el-form-item label="学生数：">{{scope.row.studentCnt}}</el-form-item>
+                <el-form-item label="学生上限：">
+                  <el-input-number v-model="form.maxStudentCount" :min="1"/>
+                </el-form-item>
               </el-form>
               <template #footer>
                 <span class="dialog-footer">
@@ -280,6 +287,7 @@ interface Class {
   course:Course,
   room:Room,
   user:User,
+  maxStudentCount:number
 }
 interface User{
   name:string,
@@ -319,7 +327,8 @@ const form = reactive({
   className:'',
   teacherChoose:'',
   courseChoose:'',
-  classCnt:0
+  classCnt:0,
+  maxStudentCount:20
 })
 
 const dayData = [
@@ -357,6 +366,7 @@ const saveClass = (index: number, row: Class) =>{
     dateList:form.time,
     termName:form.termChoose,
     courseName:form.courseChoose,
+    maxStudentCount: form.maxStudentCount
   };
 
   if (!form.isUpdate){
@@ -415,6 +425,7 @@ const clearForm = () => {
   form.dayChoose = ''
   form.time = []
   form.courseChoose = ''
+  form.maxStudentCount = 20
 }
 const handleNew = () => {
   clearForm()
@@ -429,6 +440,7 @@ const handleEdit = (index: number, row: Class) => {
   form.time[0] = row.startTime
   form.time[1] = row.endTime
   form.courseChoose = row.course.name
+  form.maxStudentCount = row.maxStudentCount
   getFreeRoomData(row.name)
 }
 const handleDelete = (index: number, row: Class) => {
