@@ -48,12 +48,16 @@ import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
 import { Lock, User } from '@element-plus/icons-vue';
 import axios from "axios";
+import {unReadCntStore} from "../store/unreadCnt";
 
 interface LoginInfo {
 	username: string;
 	password: string;
   identity: string;
 }
+const form = reactive({
+  unreadedCnt : 0
+})
 let dataUrl: string
 let errorMessage: string
 const router = useRouter();
@@ -75,6 +79,12 @@ const rules: FormRules = {
 };
 const permiss = usePermissStore();
 const login = ref<FormInstance>();
+interface Notify{
+  title:string
+  content:string
+  createTime:''
+  status:string
+}
 const submitForm = (formEl: FormInstance | undefined) => {
 	if (!formEl) return;
 	formEl.validate((valid: boolean) => {
@@ -104,6 +114,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
           localStorage.setItem('sa_token', data.data!.saTokenValue)
           localStorage.setItem('img', data.data!.imgBase64)
           // localStorage.setExpire("sa_token", data.data, 50)
+          // get unread message number
+          getNotifyList()
           ElMessage.success('登录成功');
           router.push('/');
         }else {
@@ -121,7 +133,24 @@ const submitForm = (formEl: FormInstance | undefined) => {
 		}
 	});
 };
-
+const unReadCntChange = unReadCntStore()
+const getNotifyList = () => {
+  const data = {
+    stuId : localStorage.getItem('stuId'),
+    role: localStorage.getItem('role'),
+  }
+  axios.get('/user/getNotifyList', {params:data}).then(re => {
+    if (re.data.code == 200){
+      const unReadList = re.data.data["UNREADED"] as Array<Notify>
+      if(unReadList == undefined){
+        form.unreadedCnt = 0
+      }else{
+        form.unreadedCnt = unReadList.length
+      }
+      unReadCntChange.handleUnReadCnt(form.unreadedCnt)
+    }
+  })
+}
 const imgUrlToBase64 = (imageUrl: string): string =>{
   let image = new Image() // 一定要设置为let，不然图片不显示
   image.setAttribute('crossOrigin', 'anonymous') // 解决跨域问题
