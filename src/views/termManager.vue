@@ -106,7 +106,21 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="pageSet">
+      <el-pagination
+          style="justify-content: center; "
+                     v-model:current-page="form.currentPage"
+                     v-model:page-size="form.pageSize"
+                     :page-sizes="[1, 5, 10, 20]"
+                     small="small"
+                     layout="total, sizes, prev, pager, next, jumper"
+                     :total="form.totalCnt"
+                     @size-change="handleSizeChange"
+                     @current-change="handleCurrentChange"
+      />
+      </div>
     </el-card>
+
   </el-col>
   </div>
 </template>
@@ -141,8 +155,17 @@ const form = reactive({
   isUpdate: false,
   url:'',
   search:'',
-  termToday:''
+  termToday:'',
+  currentPage:1,
+  pageSize:1,
+  totalCnt:0
 })
+const handleSizeChange = (val: number) => {
+  getTermDataList()
+}
+const handleCurrentChange = (val: number) => {
+  getTermDataList()
+}
 // const term =reactive<Term>({
 //   name: '',
 //   dateList:[],
@@ -173,12 +196,7 @@ const saveTerm = (index: number, row: Term) =>{
           ElMessage.success("更新成功");
           form.changeDialogVisible[index] = false
         }
-        const searchData = {
-          query : form.search
-        }
-        axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
-          tableData.value = (re.data.data)
-        })
+        getTermDataList()
       }else{
         ElMessage.error(res.data.message)
         console.log(res.data.message)
@@ -188,12 +206,7 @@ const saveTerm = (index: number, row: Term) =>{
   console.log(form.timeValue)
 }
 const inputChange = () => {
-  const searchData = {
-    query : form.search
-  }
-    axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
-      tableData.value = (re.data.data)
-    })
+  getTermDataList()
 }
 const handleNew = () => {
   form.init = ''
@@ -213,19 +226,24 @@ const handleDelete = (index: number, row: Term) => {
   axios.post('/term/deleteTerm', data).then(re => {
     if (re.data.code == 200){
       ElMessage.success('删除成功')
-      const searchData = {
-        query : form.search
-      }
-      axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
-        tableData.value = (re.data.data)
-      })
+      getTermDataList()
     }else {
       ElMessage.error(re.data.message)
     }
   })
   console.log(index, row)
 }
-
+const getTermDataList = () => {
+  const searchData = {
+    query : form.search,
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
+  }
+  axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
+    tableData.value = re.data.data["dataList"]
+    form.totalCnt = re.data.data["totalSize"]
+  })
+}
 let tableData = ref<Term>()
 watch(
 
@@ -233,12 +251,7 @@ watch(
 
     (newValue, oldValue) => {
 
-      const searchData = {
-        query : form.search
-      }
-        axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
-          tableData.value = (re.data.data)
-        })
+      getTermDataList()
       axios.get('/term/getTermToday').then(re => {
         if (re.data.code == 200)
           form.termToday = re.data.data
@@ -312,4 +325,10 @@ const shortcuts = [
   font-size: 14px;
   margin-bottom: 20px;
 }
+.pageSet {
+  margin-top:20px;
+}
+</style>
+<style>
+
 </style>
