@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
-		<el-tabs v-model="message">
-			<el-tab-pane :label="`未读消息(${form.unreadedCnt})`" name="first">
+		<el-tabs v-model="message" @tab-change="handleChangeTabs()">
+			<el-tab-pane :label="`未读消息(${form.unreadedCnt})`" name="UNREADED">
 				<el-table :data="UNREADED" :show-header="false" style="width: 100%">
 					<el-table-column min-width="10%">
 						<template #default="scope">
@@ -16,12 +16,23 @@
 						</template>
 					</el-table-column>
 				</el-table>
+        <el-pagination
+            style="justify-content: center; margin-top: 20px"
+            v-model:current-page="form.currentPage"
+            v-model:page-size="form.pageSize"
+            :page-sizes="[5, 10, 20]"
+            small="small"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="form.unreadedCnt"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+        />
 				<div class="handle-row">
 					<el-button type="primary" @click="handleAllRead()">全部标为已读</el-button>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane :label="`已读消息(${form.readedCnt})`" name="second">
-				<template v-if="message === 'second'">
+			<el-tab-pane :label="`已读消息(${form.readedCnt})`" name="READED">
+				<template v-if="message === 'READED'">
 					<el-table :data="READED" :show-header="false" style="width: 100%">
             <el-table-column min-width="10%">
               <template #default="scope">
@@ -37,13 +48,24 @@
 							</template>
 						</el-table-column>
 					</el-table>
+          <el-pagination
+              style="justify-content: center; margin-top: 20px"
+              v-model:current-page="form.currentPage"
+              v-model:page-size="form.pageSize"
+              :page-sizes="[5, 10, 20]"
+              small="small"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="form.readedCnt"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+          />
 					<div class="handle-row">
 						<el-button type="danger" @click="handleAllDel()">删除全部</el-button>
 					</div>
 				</template>
 			</el-tab-pane>
-			<el-tab-pane :label="`回收站(${form.recycleCnt})`" name="third">
-				<template v-if="message === 'third'">
+			<el-tab-pane :label="`回收站(${form.recycleCnt})`" name="RECYCLE">
+				<template v-if="message === 'RECYCLE'">
 					<el-table :data="RECYCLE" :show-header="false" style="width: 100%">
             <el-table-column min-width="10%">
               <template #default="scope">
@@ -58,6 +80,17 @@
 							</template>
 						</el-table-column>
 					</el-table>
+          <el-pagination
+              style="justify-content: center; margin-top: 20px"
+              v-model:current-page="form.currentPage"
+              v-model:page-size="form.pageSize"
+              :page-sizes="[5, 10, 20]"
+              small="small"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="form.recycleCnt"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+          />
 					<div class="handle-row">
 						<el-button type="danger" @click="form.centerDialogVisible = true">清空回收站</el-button>
             <el-dialog v-model="form.centerDialogVisible"  width="30%">
@@ -97,12 +130,18 @@ const form = reactive({
   unreadedCnt : 0,
   readedCnt :0,
   recycleCnt:0,
-  centerDialogVisible:false
+  centerDialogVisible:false,
+  currentPage:1,
+  pageSize:5,
 })
-const message = ref('first');
+const message = ref('UNREADED');
 let UNREADED = ref<Notify>()
 let READED =  ref<Notify>()
 let RECYCLE =  ref<Notify>()
+const handleChangeTabs = () =>{
+  form.currentPage = 1
+  getNotifyList()
+}
 const handleRead = (index: number, row: Notify) => {
   const data = {
     stuId : localStorage.getItem('stuId'),
@@ -188,37 +227,29 @@ const clearRecycle = () => {
     }
   })
 };
+const handleSizeChange = (val: number) => {
+  getNotifyList()
+}
+const handleCurrentChange = (val: number) => {
+  getNotifyList()
+}
 const unReadCntChange = unReadCntStore()
 const getNotifyList = () => {
   const data = {
     stuId : localStorage.getItem('stuId'),
     role: localStorage.getItem('role'),
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage,
   }
   axios.get('/user/getNotifyList', {params:data}).then(re => {
     if (re.data.code == 200){
-      UNREADED.value = (re.data.data["UNREADED"])
-      const unReadList = re.data.data["UNREADED"] as Array<Notify>
-      if(unReadList == undefined){
-        form.unreadedCnt = 0
-      }else{
-        form.unreadedCnt = unReadList.length
-      }
+      UNREADED.value = (re.data.data["dataList"]["UNREADED"])
+      READED.value = (re.data.data["dataList"]["READED"])
+      RECYCLE.value = (re.data.data["dataList"]["RECYCLE"])
+      form.unreadedCnt = re.data.data["UnreadTotalSize"]
       unReadCntChange.handleUnReadCnt(form.unreadedCnt)
-      READED.value = (re.data.data["READED"])
-      const readList = re.data.data["READED"] as Array<Notify>
-      if(readList == undefined){
-        form.readedCnt = 0
-      }else{
-        form.readedCnt = readList.length
-      }
-
-      RECYCLE.value = (re.data.data["RECYCLE"])
-      const recycleList = re.data.data["RECYCLE"] as Array<Notify>
-      if(recycleList == undefined){
-        form.recycleCnt = 0
-      }else{
-        form.recycleCnt = recycleList.length
-      }
+      form.readedCnt = (re.data.data["readTotalSize"])
+      form.recycleCnt = (re.data.data["recycleTotalSize"])
     }
   })
 }

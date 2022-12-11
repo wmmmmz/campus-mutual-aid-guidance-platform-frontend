@@ -4,7 +4,7 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>{{form.termChoose}} 已开设课程数：{{form.courseCnt}}</h2>
+          <h2>{{form.termChoose}} 已开设课程</h2>
         </div>
       </template>
       <el-table :data="tableData" style="width: 100%">
@@ -67,6 +67,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -105,7 +116,10 @@ const form = reactive({
   termToday:'',
   termChoose: '',
   courseCnt:0,
-  originalCourseName :''
+  originalCourseName :'',
+  currentPage:1,
+  pageSize:5,
+  totalCnt:0
 })
 const saveCourse = (index: number, row: Course) =>{
   const data = {
@@ -180,20 +194,23 @@ let tableData = ref<Course>()
 const changeTerm = () => {
   getCourseDataList()
 }
+const handleSizeChange = (val: number) => {
+  getCourseDataList()
+}
+const handleCurrentChange = (val: number) => {
+  getCourseDataList()
+}
 const getCourseDataList = () => {
   const data = {
     termName: form.termChoose,
-    query: form.search
+    query: form.search,
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/course/getCourseDataList', {params:data}).then(re => {
     if (re.data.code == 200){
-      tableData.value = re.data.data
-      const courseCnt = re.data.data as Array<Course>
-      if (courseCnt == undefined){
-        form.courseCnt = 0
-      }else {
-        form.courseCnt = courseCnt.length
-      }
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
     }
   })
 }

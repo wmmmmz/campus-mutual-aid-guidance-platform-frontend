@@ -4,7 +4,7 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>{{form.termChoose}} 已开设班级数：{{form.classCnt}}</h2>
+          <h2>{{form.termChoose}} 已开设班级</h2>
         </div>
       </template>
       <div>
@@ -239,6 +239,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -252,22 +263,6 @@ import { InfoFilled } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import router from "../router";
 
-// const router = useRoute();
-const mockData = [
-  {
-    studentName:'wmz',
-    studentStuId:'20191112324',
-    studentClass:'19计科C2',
-    studentTel:'18918522833',
-    studentWx:'mengzhe_6721',
-  },{
-    studentName:'wmz',
-    studentStuId:'20191112324',
-    studentClass:'19计科C2',
-    studentTel:'18918522833',
-    studentWx:'mengzhe_6721',
-  }
-]
 interface Class {
   name: string
   teacherName: string
@@ -328,7 +323,10 @@ const form = reactive({
   teacherChoose:'',
   courseChoose:'',
   classCnt:0,
-  maxStudentCount:20
+  maxStudentCount:20,
+  currentPage:1,
+  pageSize:3,
+  totalCnt:0
 })
 
 const dayData = [
@@ -357,6 +355,12 @@ interface roomDataList{
 }
 let courseData = ref<courseDataList>()
 let roomData = ref<roomDataList>()
+const handleSizeChange = (val: number) => {
+  getClassDataList()
+}
+const handleCurrentChange = (val: number) => {
+  getClassDataList()
+}
 const saveClass = (index: number, row: Class) =>{
   const data = {
     className: form.className,
@@ -493,22 +497,19 @@ const getClassDataList = () => {
   const data = {
     termName: form.termChoose,
     query: form.search,
-    role: localStorage.getItem('role')
+    role: localStorage.getItem('role'),
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/class/getClassDataList', {params:data}).then(re => {
     if (re.data.code == 200){
-
-      tableData.value = re.data.data
-      const classCnt = re.data.data as Array<Class>
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
+      const classCnt = re.data.data["dataList"] as Array<Class>
       classCnt.forEach((data =>{
         const userList = data.studentList as Array<User>
         data.studentCnt = userList.length
       }))
-      if (classCnt == undefined){
-        form.classCnt = 0
-      }else {
-        form.classCnt = classCnt.length
-      }
     }
   })
 }

@@ -71,6 +71,17 @@
       </el-collapse-item>
       </div>
     </el-collapse>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -112,8 +123,19 @@ const form = reactive({
   search:'',
   activeNames:[],
   refuseReason:'',
-  dialogVisible:[false]
+  dialogVisible:[false],
+  currentPage:1,
+  pageSize:5,
+  totalCnt:0
 })
+const handleSizeChange = (val: number) => {
+  getTeachEnrollDataList()
+  form.activeNames = []
+}
+const handleCurrentChange = (val: number) => {
+  getTeachEnrollDataList()
+  form.activeNames = []
+}
 const handleChange = (val: string[]) => {
   console.log(val)
 }
@@ -158,11 +180,14 @@ const getTeachEnrollDataList = () => {
   const data = {
     query: form.search,
     termName : form.termChoose,
-    stuId : localStorage.getItem('stuId')
+    stuId : localStorage.getItem('stuId'),
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/teachEnroll/getTeachEnrollDataList', {params:data}).then(re => {
     if (re.data.code == 200){
-      tableData.value = re.data.data
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
     }
   })
 }

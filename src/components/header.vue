@@ -48,6 +48,7 @@ import imgurl from '../assets/img/img.jpg';
 import axios from "axios";
 import {ElMessage} from "element-plus";
 import {unReadCntStore} from "../store/unreadCnt";
+import {restore} from "wangeditor/dist/editor/history/data/node/decompilation";
 
 let username: string | null = localStorage.getItem('username');
 
@@ -65,7 +66,9 @@ onMounted(() => {
 const unReadCnt = unReadCntStore()
 const form = reactive({
   imgUrl : localStorage.getItem('img'),
-  message : 0
+  message : 0,
+  currentPage:1,
+  pageSize:5,
 })
 // 用户名下拉菜单选择事件
 const router = useRouter();
@@ -96,16 +99,12 @@ const getNotifyList = () => {
   const data = {
     stuId : localStorage.getItem('stuId'),
     role: localStorage.getItem('role'),
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/user/getNotifyList', {params:data}).then(re => {
     if (re.data.code == 200){
-      const unReadList = re.data.data["UNREADED"] as Array<Notify>
-      if(unReadList == undefined){
-        form.message = 0
-      }else{
-        form.message = unReadList.length
-      }
-
+      form.message = re.data.data["UnreadTotalSize"]
     }
   })
 }

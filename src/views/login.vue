@@ -56,7 +56,9 @@ interface LoginInfo {
   identity: string;
 }
 const form = reactive({
-  unreadedCnt : 0
+  unreadedCnt : 0,
+  currentPage:1,
+  pageSize:5,
 })
 let dataUrl: string
 let errorMessage: string
@@ -138,15 +140,12 @@ const getNotifyList = () => {
   const data = {
     stuId : localStorage.getItem('stuId'),
     role: localStorage.getItem('role'),
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/user/getNotifyList', {params:data}).then(re => {
     if (re.data.code == 200){
-      const unReadList = re.data.data["UNREADED"] as Array<Notify>
-      if(unReadList == undefined){
-        form.unreadedCnt = 0
-      }else{
-        form.unreadedCnt = unReadList.length
-      }
+      form.unreadedCnt = re.data.data["UnreadTotalSize"]
       unReadCntChange.handleUnReadCnt(form.unreadedCnt)
     }
   })

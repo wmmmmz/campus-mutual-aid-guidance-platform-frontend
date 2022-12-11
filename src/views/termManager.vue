@@ -106,19 +106,17 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pageSet">
       <el-pagination
-          style="justify-content: center; "
+          style="justify-content: center; margin-top: 20px"
                      v-model:current-page="form.currentPage"
                      v-model:page-size="form.pageSize"
-                     :page-sizes="[1, 5, 10, 20]"
+                     :page-sizes="[5, 10, 20]"
                      small="small"
                      layout="total, sizes, prev, pager, next, jumper"
                      :total="form.totalCnt"
                      @size-change="handleSizeChange"
                      @current-change="handleCurrentChange"
       />
-      </div>
     </el-card>
 
   </el-col>
@@ -157,7 +155,7 @@ const form = reactive({
   search:'',
   termToday:'',
   currentPage:1,
-  pageSize:1,
+  pageSize:5,
   totalCnt:0
 })
 const handleSizeChange = (val: number) => {
@@ -240,8 +238,10 @@ const getTermDataList = () => {
     pageIndex: form.currentPage
   }
   axios.get('/term/getTermDataList',{params:searchData}).then(re =>{
-    tableData.value = re.data.data["dataList"]
-    form.totalCnt = re.data.data["totalSize"]
+    if (re.data.code == 200){
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
+    }
   })
 }
 let tableData = ref<Term>()
@@ -324,9 +324,6 @@ const shortcuts = [
   color: var(--el-text-color-secondary);
   font-size: 14px;
   margin-bottom: 20px;
-}
-.pageSet {
-  margin-top:20px;
 }
 </style>
 <style>

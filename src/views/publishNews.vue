@@ -86,6 +86,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -118,9 +129,17 @@ const form = reactive({
   title:'',
   content:'',
   notifyIdentity:[],
-  role :localStorage.getItem('role')
+  role :localStorage.getItem('role'),
+  currentPage:1,
+  pageSize:5,
+  totalCnt:0
 })
-
+const handleSizeChange = (val: number) => {
+  getNotifyDataList()
+}
+const handleCurrentChange = (val: number) => {
+  getNotifyDataList()
+}
 const saveNotify = () => {
   const data = {
     senderStuId: localStorage.getItem('stuId'),
@@ -133,16 +152,7 @@ const saveNotify = () => {
       if (re.data.code == 200){
         ElMessage.success("发布成功")
         form.dialogVisible = false
-        const data = {
-          stuId : localStorage.getItem('stuId'),
-          role: localStorage.getItem('role'),
-        }
-        axios.get('/notifyAnnounce/getNotifyISent', {params:data}).then(re => {
-          if (re.data.code == 200){
-            tableData.value = re.data.data
-            console.log(tableData)
-          }
-        })
+        getNotifyDataList()
       }else {
         ElMessage.error(re.data.message)
       }
@@ -151,16 +161,7 @@ const saveNotify = () => {
 }
 
 const inputChange = () => {
-  const data = {
-    stuId : localStorage.getItem('stuId'),
-    role: localStorage.getItem('role'),
-    query: form.search
-  }
-  axios.get('/notifyAnnounce/getNotifyISent', {params:data}).then(re => {
-    if (re.data.code == 200){
-      tableData.value = re.data.data
-    }
-  })
+  getNotifyDataList()
 }
 const cancelEvent = () => {
   console.log('cancel!')
@@ -177,43 +178,35 @@ const handleDelete = (index: number, row: Notify) =>{
   axios.post('/notifyAnnounce/deleteNotify', data).then(re => {
       if (re.data.code == 200){
         ElMessage.success("删除成功")
-        const data = {
-          stuId : localStorage.getItem('stuId'),
-          role: localStorage.getItem('role'),
-          query: form.search
-        }
-        axios.get('/notifyAnnounce/getNotifyISent', {params:data}).then(re => {
-          if (re.data.code == 200){
-            tableData.value = re.data.data
-          }
-        })
+        getNotifyDataList()
       }
   })
 }
 const handleNewNotify = () =>{
 
 }
-
+const getNotifyDataList = () => {
+  const data = {
+    stuId : localStorage.getItem('stuId'),
+    role: localStorage.getItem('role'),
+    query: form.search,
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
+  }
+  axios.get('/notifyAnnounce/getNotifyISent', {params:data}).then(re => {
+    if (re.data.code == 200){
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
+    }
+  })
+}
 let tableData = ref<Notify>()
 watch(
 
     () => router.currentRoute.value.path,
 
     (newValue, oldValue) => {
-
-      const data = {
-        stuId : localStorage.getItem('stuId'),
-        role: localStorage.getItem('role'),
-        query: form.search
-      }
-      axios.get('/notifyAnnounce/getNotifyISent', {params:data}).then(re => {
-        if (re.data.code == 200){
-          tableData.value = re.data.data
-          console.log(tableData)
-        }
-      })
-
-
+      getNotifyDataList()
     },
 
     { immediate: true }

@@ -4,7 +4,7 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>{{form.termChoose}} 我教的课 班级数：{{form.classCnt}}</h2>
+          <h2>{{form.termChoose}} 我教的课</h2>
         </div>
       </template>
       <div>
@@ -87,6 +87,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -160,7 +171,10 @@ const form = reactive({
   teacherChoose:'',
   courseChoose:'',
   classCnt:0,
-  classUrl:''
+  classUrl:'',
+  currentPage:1,
+  pageSize:5,
+  totalCnt:0
 })
 
 interface courseDataList{
@@ -175,6 +189,12 @@ const classLink = (link : string) => {
   window.open(link);
 }
 const inputChange = () => {
+  getClassDataList()
+}
+const handleSizeChange = (val: number) => {
+  getClassDataList()
+}
+const handleCurrentChange = (val: number) => {
   getClassDataList()
 }
 const handleUpdateTencentMeeting = (row : Class, index : number) => {
@@ -216,22 +236,19 @@ const getClassDataList = () => {
     termName: form.termChoose,
     query: form.search,
     stuId: localStorage.getItem('stuId'),
-    role: localStorage.getItem('role')
+    role: localStorage.getItem('role'),
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/class/getClassDataList', {params:data}).then(re => {
     if (re.data.code == 200){
-
-      tableData.value = re.data.data
-      const classCnt = re.data.data as Array<Class>
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
+      const classCnt = re.data.data["dataList"] as Array<Class>
       classCnt.forEach((data =>{
         const userList = data.studentList as Array<User>
         data.studentCnt = userList.length
       }))
-      if (classCnt == undefined){
-        form.classCnt = 0
-      }else {
-        form.classCnt = classCnt.length
-      }
     }
   })
 }

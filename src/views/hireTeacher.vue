@@ -4,7 +4,7 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>{{form.termChoose}} 报名授课学生数：{{form.enrollTeacherCnt}}</h2>
+          <h2>{{form.termChoose}} 报名授课学生</h2>
         </div>
       </template>
       <i class="el-icon-lx-calendar"></i>&nbsp;
@@ -125,6 +125,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -202,8 +213,17 @@ const form = reactive({
   suffixName:'',
   statusChoose:'',
   interViewUrl:'',
-  reason:''
+  reason:'',
+  currentPage:1,
+  pageSize:5,
+  totalCnt:0
 })
+const handleSizeChange = (val: number) => {
+  getTeachEnrollDataList()
+}
+const handleCurrentChange = (val: number) => {
+  getTeachEnrollDataList()
+}
 const handleChange = (row : TeachEnroll) => {
   statusData.forEach((stats : any) => {
       stats.disable = false
@@ -335,16 +355,13 @@ const getTeachEnrollDataList = () => {
   const data = {
     query: form.search,
     termName : form.termChoose,
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/teachEnroll/getTeachEnrollDataList', {params:data}).then(re => {
     if (re.data.code == 200){
-      tableData.value = re.data.data
-      const enrollTeacherCnt = re.data.data as Array<TeachEnroll>
-      if (enrollTeacherCnt == undefined){
-        form.enrollTeacherCnt = 0
-      }else {
-        form.enrollTeacherCnt = enrollTeacherCnt.length
-      }
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
     }
   })
 }

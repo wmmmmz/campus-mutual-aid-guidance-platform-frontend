@@ -53,6 +53,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+          style="justify-content: center; margin-top: 20px"
+          v-model:current-page="form.currentPage"
+          v-model:page-size="form.pageSize"
+          :page-sizes="[5, 10, 20]"
+          small="small"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="form.totalCnt"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+      />
     </el-card>
   </el-col>
   </div>
@@ -109,7 +120,10 @@ const form = reactive({
   enrollClassCnt:0,
   newFile:new FormData(),
   tempFilePath:'',
-  suffixName:''
+  suffixName:'',
+  currentPage:1,
+  pageSize:5,
+  totalCnt:0
 })
 const classEnroll = (row : Class, index : number) => {
   const data = {
@@ -201,21 +215,24 @@ let tableData = ref<Class>()
 const changeTerm = () => {
   getClassDataList()
 }
+const handleSizeChange = (val: number) => {
+  getClassDataList()
+}
+const handleCurrentChange = (val: number) => {
+  getClassDataList()
+}
 const getClassDataList = () => {
   const data = {
     termName: form.termChoose,
     query: form.search,
-    status: '招募学生中'
+    status: '学生报名中',
+    pageSize: form.pageSize,
+    pageIndex: form.currentPage
   }
   axios.get('/class/getClassByStatus', {params:data}).then(re => {
     if (re.data.code == 200){
-      tableData.value = re.data.data
-      const enrollClassCnt = re.data.data as Array<Class>
-      if (enrollClassCnt == undefined){
-        form.enrollClassCnt = 0
-      }else {
-        form.enrollClassCnt = enrollClassCnt.length
-      }
+      tableData.value = re.data.data["dataList"]
+      form.totalCnt = re.data.data["totalSize"]
     }
   })
 }
