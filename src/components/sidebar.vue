@@ -197,7 +197,12 @@ const items = [
         permiss: 'enrollClass',
       }
     ]
-  }
+  }, {
+    icon: 'PieChart',
+    index: '/adminManager',
+    title: '管理员管理',
+    permiss: 'adminManager'
+  },
 ];
 
 const route = useRoute();

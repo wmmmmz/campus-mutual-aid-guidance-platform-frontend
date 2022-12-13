@@ -33,7 +33,7 @@
               <el-radio label="student">学生</el-radio>
               <el-radio label="teacher">导生</el-radio>
               <el-radio label="admin">管理员</el-radio>
-              <el-radio label="supeAdmin">超级管理员</el-radio>
+              <el-radio label="superAdmin">超级管理员</el-radio>
             </el-radio-group>
           </div>
           <div class="login-btn">

@@ -178,6 +178,14 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'enrollClass'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/enrollClass.vue')
+            }, {
+                path: '/adminManager',
+                name: 'adminManager',
+                meta: {
+                    title: '管理员管理',
+                    permiss: 'adminManager'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/adminManager.vue')
             }
         ]
     }, {
