@@ -1,42 +1,51 @@
 <template>
-	<div class="login-wrap">
-		<div class="ms-login">
-			<div class="ms-title">校园互助辅导平台</div>
-			<el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
-				<el-form-item prop="username">
-					<el-input v-model="param.username" placeholder="username">
-						<template #prepend>
-							<el-button :icon="User"></el-button>
-						</template>
-					</el-input>
-				</el-form-item>
-				<el-form-item prop="password">
-					<el-input
-						type="password"
-						placeholder="password"
-						v-model="param.password"
-						@keyup.enter="submitForm(login)"
-					>
-						<template #prepend>
-							<el-button :icon="Lock"></el-button>
-						</template>
-					</el-input>
-				</el-form-item>
-				<div class="identity-btn">
-          &nbsp&nbsp&nbsp&nbsp
-          <el-radio-group v-model="param.identity">
-            <el-radio label="student">学生</el-radio>
-            <el-radio label="teacher">导生</el-radio>
-            <el-radio label="admin">管理员</el-radio>
-          </el-radio-group>
-				</div>
-        <div class="login-btn">
-          <el-button type="primary" size="mini" @click="submitForm(login)">登陆</el-button>
+  <div class="login-content">
+    <div class="login-left-wrap">
+      <div class="ms-login">
+        <div class="ms-title">
+          <img src="../assets/img/login_logo.jpg" alt="icon" width="250" height="100">
+          <br>
+          <img src="../assets/img/login_title.jpg" alt="icon" width="650" height="150">
         </div>
-        <p class="login-tips">{{errorMessage}}</p>
-			</el-form>
-		</div>
-	</div>
+        <br>
+        <el-form size="large" :model="param" :rules="rules" ref="login" class="ms-content">
+          <el-form-item prop="username"  style="width:80%;display: inline-block">
+            <el-input v-model="param.username" placeholder="username">
+              <template #prepend>
+                <el-button :icon="User"></el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password" style="width:80%;display: inline-block">
+            <el-input
+                type="password"
+                placeholder="password"
+                v-model="param.password"
+                @keyup.enter="submitForm(login)"
+            >
+              <template #prepend>
+                <el-button :icon="Lock"></el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+          <div class="identity-btn" >
+            <el-radio-group v-model="param.identity">
+              <el-radio label="student">学生</el-radio>
+              <el-radio label="teacher">导生</el-radio>
+              <el-radio label="admin">管理员</el-radio>
+              <el-radio label="supeAdmin">超级管理员</el-radio>
+            </el-radio-group>
+          </div>
+          <div class="login-btn">
+            <el-button plain style="width: 80%;background-color: #0A6AB8; color: white; border-color: #0A6AB8" type="primary" size="large" @click="submitForm(login)">登陆</el-button>
+          </div>
+          <p class="login-tips">{{errorMessage}}</p>
+        </el-form>
+      </div>
+    </div>
+    <div class="login-right-wrap"></div>
+  </div>
+
 </template>
 
 <script setup lang="ts">
@@ -191,50 +200,69 @@ const tags = useTagsStore();
 tags.clearTags();
 </script>
 
-<style scoped>
-.login-wrap {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	background-image: url(../assets/img/login-bg.jpg);
-	background-size: 100%;
+<style lang="scss">
+
+
+
+
+
+
+.login-content{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  .login-right-wrap {
+    width: 55%;
+    height: 100%;
+    background-image: url(../assets/img/login_bg.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .login-left-wrap {
+    width: 45%;
+    height: 100%;
+    margin-right: 2%;
+    margin-left: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .ms-login {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      .ms-title {
+        text-align: center;
+      }
+      .ms-content {
+        text-align: center;
+        .login-btn  {
+          text-align: center;
+          height: 36px;
+        }
+        .login-tips {
+          font-size: 12px;
+          line-height: 30px;
+          color: #fff;
+        }
+        .identity-btn div {
+          margin-bottom: 25px;
+          justify-content: center;
+          display: inline-block
+        }
+      }
+    }
+
+  }
+
 }
-.ms-title {
-	width: 100%;
-	line-height: 50px;
-	text-align: center;
-	font-size: 20px;
-	color: #fff;
-	border-bottom: 1px solid #ddd;
+</style>
+<style lang="less">
+/*// 添加颜色类*/
+.el-radio__input.is-checked + .el-radio__label {
+  color: #0A6AB8 !important;
 }
-.ms-login {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	width: 350px;
-	margin: -190px 0 0 -175px;
-	border-radius: 5px;
-	background: rgba(255, 255, 255, 0.3);
-	overflow: hidden;
-}
-.ms-content {
-	padding: 30px 30px;
-}
-.login-btn {
-	text-align: center;
-}
-.login-btn button {
-	width: 100%;
-	height: 36px;
-	margin-bottom: 10px;
-}
-.identity-btn div{
-  height: 36px;
-  margin-bottom: 10px;
-}
-.login-tips {
-	font-size: 12px;
-	line-height: 30px;
-	color: #fff;
+.el-radio__input.is-checked .el-radio__inner {
+  background: #0A6AB8 !important;
+  border-color: #0A6AB8 !important;
 }
 </style>
