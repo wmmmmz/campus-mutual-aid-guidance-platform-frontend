@@ -8,7 +8,7 @@
           </div>
         </template>
         <el-table :data="tableData" style="width: 100%">
-          <el-table-column label="姓名" prop="name" min-width="15%"/>
+          <el-table-column label="姓名" prop="name" min-width="10%"/>
           <el-table-column label="班级" prop="className" min-width="10%"/>
           <el-table-column label="学号" prop="stuId" min-width="10%"/>
           <el-table-column label="联系电话" prop="tel" min-width="10%"/>
