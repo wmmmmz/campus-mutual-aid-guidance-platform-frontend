@@ -50,18 +50,34 @@
               </el-dialog>
             </template>
             <template #default="scope">
-               <el-popconfirm
-                  confirm-button-text="是"
-                  confirm-button-type="danger"
-                  cancel-button-text="否"
-                  :icon="InfoFilled"
-                  icon-color="#ff0000"
-                  title="确定回收此管理员账号吗"
-                  @confirm="handleDelete(scope.$index, scope.row)"
-                  @cancel="cancelEvent"
+<!--                  <el-button type="danger" @click="handleLock(true, scope.row)" v-if="scope.row.locked == null || scope.row.locked === false">锁定账号</el-button>-->
+<!--                  <el-button type="primary" @click="handleLock(false ,scope.row)" v-if="scope.row.locked === true" >解锁账号</el-button>-->
+              <el-popconfirm  v-if="scope.row.locked === true"
+                              confirm-button-text="是"
+                              confirm-button-type="danger"
+                              cancel-button-text="否"
+                              :icon="InfoFilled"
+                              icon-color="#ff0000"
+                              title="确定解锁此管理员账号吗"
+                              @confirm="handleLock(false, scope.row)"
+                              @cancel="cancelEvent"
               >
                 <template #reference>
-                  <el-button type="danger">回收账号</el-button>
+                  <el-button v-if="scope.row.locked === true" type="primary">解锁账号</el-button>
+                </template>
+              </el-popconfirm>
+              <el-popconfirm  v-if="scope.row.locked == null || scope.row.locked === false"
+                              confirm-button-text="是"
+                              confirm-button-type="danger"
+                              cancel-button-text="否"
+                              :icon="InfoFilled"
+                              icon-color="#ff0000"
+                              title="确定锁定此管理员账号吗"
+                              @confirm="handleLock(true, scope.row)"
+                              @cancel="cancelEvent"
+              >
+                <template #reference>
+                  <el-button v-if="scope.row.locked == null || scope.row.locked === false" type="danger">锁定账号</el-button>
                 </template>
               </el-popconfirm>
             </template>
@@ -103,7 +119,27 @@ const value = ref<string[]>([])
 const loading = ref(false)
 
 
+const handleLock = (lock : boolean, row : User) => {
+  const data = {
+    lock: lock,
+    stuId: row.stuId,
+    role: "admin"
+  }
+  axios.post('/user/handleUserLock', data).then(re => {
+    if (re.data.code == 200){
+      if (!lock){
+        ElMessage.success("解锁账号成功")
+      }else {
+        ElMessage.success("锁定账号成功")
+      }
+      getAdminDataList()
+    }else{
+      ElMessage.error(re.data.message)
+    }
+  })
 
+  console.log(row.locked)
+}
 const remoteMethod = (query: string) => {
   if (query) {
     loading.value = true
@@ -125,6 +161,7 @@ interface User {
   className:string
   tel: string
   wx: string
+  locked: any
 }
 const cancelEvent = () => {
   console.log('cancel!')
@@ -141,7 +178,8 @@ const form = reactive({
   termToday:'',
   currentPage:1,
   pageSize:5,
-  totalCnt:0
+  totalCnt:0,
+  lock: false
 })
 const handleSizeChange = (val: number) => {
   getAdminDataList()
