@@ -9,7 +9,7 @@
       </template>
       <div>
         <i class="el-icon-lx-calendar"></i>&nbsp;
-        <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+        <el-tree-select v-model="form.termChoose" style="width:225px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
       </div>
       &nbsp;<br>
       <el-table class="tableBox" border :cell-style="cellStyle" :data="tableData"   style="width: 100%">

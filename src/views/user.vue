@@ -9,9 +9,7 @@
 						</div>
 					</template>
 					<div class="info">
-<!--            <img :src="form.img" >-->
-
-            						<div class="info-image" @click="showDialog">
+            <div class="info-image" @click="showDialog">
 							<el-avatar :size="110" :src="form.imgSrc" />
 							<span class="info-edit">
 								<i class="el-icon-lx-camerafill"></i>
@@ -23,7 +21,10 @@
 						<div class="info-desc">学号：{{stuId}}</div>
 						<div class="info-desc">联系电话：{{form.tel}}</div>
 						<div class="info-desc">微信号：{{form.wx}}</div>
-						<div class="info-desc">账号类型：{{role}}账号</div>
+						<div class="info-desc" v-if="role === 'student'">账号类型：学生账号</div>
+						<div class="info-desc" v-if="role === 'teacher'">账号类型：导生账号</div>
+						<div class="info-desc" v-if="role === 'admin'">账号类型：管理员账号</div>
+						<div class="info-desc" v-if="role === 'superAdmin'">账号类型：超级管理员账号</div>
 						<div class="info-desc">个人简介：{{form.desc}}</div>
 					</div>
           <br>
@@ -164,14 +165,14 @@ const onSubmitPwd = () => {
             ElMessage.success("修改成功")
             router.push('/login')
           }else{
-            ElMessage.error("修改失败")
+            ElMessage.error(response.data.message)
           }
         })
       }else{
         ElMessage.error("新密码不能与旧密码相同")
       }
     }else{
-      ElMessage.error("旧密码错误")
+      ElMessage.error(response.data.message)
     }
   })
 

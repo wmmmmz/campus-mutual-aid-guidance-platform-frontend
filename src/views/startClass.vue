@@ -9,7 +9,7 @@
       </template>
       <div>
         <i class="el-icon-lx-calendar"></i>&nbsp;
-        <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+        <el-tree-select v-model="form.termChoose" style="width:225px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
         &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <i class="el-icon-lx-search"></i>&nbsp;
         <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
@@ -160,7 +160,7 @@
         </el-table-column>
         <el-table-column align="right" min-width="26%">
           <template #default="scope">
-            <el-button v-if="scope.row.status === '招募导生完成'" plain @click="changeStatus(scope.row, '招募学生中')">开始学生报名</el-button>
+            <el-button v-if="scope.row.status === '招募导生完成'" plain @click="changeStatus(scope.row, '学生报名中')">开始学生报名</el-button>
             <el-button v-if="scope.row.status === '学生报名中'" @click="changeStatus(scope.row, '学生报名截止')">结束学生报名</el-button>
             <el-button v-if="scope.row.status === '学生报名截止'" @click="changeStatus(scope.row, '已开班')">开班</el-button>
             <el-button v-if="scope.row.status !== '已开班'" @click="form.changeDialogVisible[scope.$index] = true; handleEdit(scope.$index, scope.row)">修改</el-button>
@@ -325,7 +325,7 @@ const form = reactive({
   classCnt:0,
   maxStudentCount:20,
   currentPage:1,
-  pageSize:3,
+  pageSize:5,
   totalCnt:0
 })
 

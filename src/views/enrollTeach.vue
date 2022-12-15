@@ -28,9 +28,9 @@
           </template>
         </el-table-column>
         <el-table-column label="上课地点" prop="classroom" min-width="17%"/>
-        <el-table-column align="right" min-width="43%">
+        <el-table-column align="right" min-width="50%">
           <template #header>
-            <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+            <el-tree-select v-model="form.termChoose" style="width:225px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
             &nbsp;
             <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
           </template>
@@ -155,8 +155,12 @@ const checkEnroll = (row : Class, index : number) => {
 }
 const BeforeUpload = (file : any) => {
   if(file){
+    const suffix = file.name.substring(file.name.lastIndexOf('.') + 1)
+    if (suffix !== 'doc' && suffix !== 'docx' && suffix !== 'pdf'){
+      ElMessage.error("不支持上传此格式文件")
+      return false;
+    }
     form.newFile.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
-    console.log(form.newFile.get('file'))
   }else{
     return false;
   }

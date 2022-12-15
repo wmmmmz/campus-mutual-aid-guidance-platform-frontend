@@ -42,9 +42,9 @@
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column align="right" min-width="43%">
+        <el-table-column align="right" min-width="50%">
           <template #header>
-            <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+            <el-tree-select v-model="form.termChoose" style="width:225px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
             &nbsp;
             <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
           </template>

@@ -8,7 +8,7 @@
         </div>
       </template>
       <i class="el-icon-lx-calendar"></i>&nbsp;
-      <el-tree-select v-model="form.termChoose" style="width:205px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
+      <el-tree-select v-model="form.termChoose" style="width:225px" :data="termData" :render-after-expand="false" @change="changeTerm()"/>
       &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <i class="el-icon-lx-search"></i>&nbsp;
       <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
@@ -106,13 +106,14 @@
                            type="primary" >点击预定会议</el-link>
                 </el-form-item>
                 <el-form-item v-if="form.statusChoose == '成为导生'" class="blueItem" label="提示：">
-                  <p style="color: #2d8cf0">系统将自动为该同学创建导生账号，并发送提醒通知</p>
+                  <p style="color: #2d8cf0">系统已自动为该同学创建导生账号，并发送提醒通知</p>
                 </el-form-item>
                 <el-form-item v-if="form.statusChoose == '面试通过'" class="blueItem" label="提示：">
                   <p style="color: #2d8cf0">系统将自动向该同学发送确认offer通知<br>请关注 我的消息 查看学生选择结果。</p>
                 </el-form-item>
                 <el-form-item v-if="form.statusChoose == '流程中断'" label="原因：">
-                  <el-input v-model="form.reason" style="width: 260px" placeholder="请输入流程中断原因"></el-input>
+                  <p v-if="scope.row.remark">{{scope.row.remark}}</p>
+                  <el-input v-if="!scope.row.remark" v-model="form.reason" style="width: 260px" placeholder="请输入流程中断原因"></el-input>
                 </el-form-item>
               </el-form>
               <template #footer>
@@ -165,7 +166,8 @@ interface TeachEnroll {
   resumeUrl:string,
   interviewStartTime:never,
   interviewEndTime:never,
-  interviewLink:string
+  interviewLink:string,
+  remark:string
 }
 
 interface termNameList{
@@ -185,7 +187,6 @@ let statusData = [
   {value:'报名成功', disabled:false},
   {value:'安排面试', disabled:false},
   {value:'面试通过', disabled:false},
-  {value:'成为导生', disabled:false},
   {value:'流程中断', disabled:false},
   {value:'流程终止', disabled:false},
 ]
@@ -246,7 +247,7 @@ const handleChange = (row : TeachEnroll) => {
     })
   }else if(form.statusChoose == '流程终止'){
     statusData.forEach((stats : any) => {
-      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '面试通过' || stats.value == '成为导生'
+      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '面试通过'
           || stats.value == '流程中断')
         stats.disabled = true
     })
@@ -273,9 +274,9 @@ const handleEnroll = (row : TeachEnroll, index : number) => {
     reason: form.reason,
     fromAdmin: true
   }
-  if (form.statusChoose == '安排面试'){
+  if (form.statusChoose == '安排面试') {
     axios.post('/teachEnroll/updateStatusToArrangeInterview', data).then(re => {
-      if (re.data.code == 200){
+      if (re.data.code == 200) {
         ElNotification({
           title: '修改状态成功',
           message: '系统将自动给该学生发送面试流程更新通知',
@@ -283,21 +284,7 @@ const handleEnroll = (row : TeachEnroll, index : number) => {
         })
         form.changeDialogVisible[index] = false
         getTeachEnrollDataList()
-      }else {
-        ElMessage.error(re.data.message)
-      }
-    })
-  }else if (form.statusChoose == '成为导生'){
-    axios.post('/teachEnroll/updateStatusToHired', data).then(re => {
-      if (re.data.code == 200){
-        ElNotification({
-          title: '修改状态成功',
-          message: '系统将自动给该学生发送面试流程更新通知',
-          type: 'success',
-        })
-        form.changeDialogVisible[index] = false
-        getTeachEnrollDataList()
-      }else {
+      } else {
         ElMessage.error(re.data.message)
       }
     })

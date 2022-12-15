@@ -10,7 +10,7 @@
         <br>
         <el-form size="large" :model="param" :rules="rules" ref="login" class="ms-content">
           <el-form-item prop="username"  style="width:80%;display: inline-block">
-            <el-input v-model="param.username" placeholder="username">
+            <el-input v-model="param.username" placeholder="请输入学号">
               <template #prepend>
                 <el-button :icon="User"></el-button>
               </template>
@@ -19,7 +19,7 @@
           <el-form-item prop="password" style="width:80%;display: inline-block">
             <el-input
                 type="password"
-                placeholder="password"
+                placeholder="请输入密码"
                 v-model="param.password"
                 @keyup.enter="submitForm(login)"
             >
