@@ -23,7 +23,7 @@
             </el-select>
             &nbsp;&nbsp;<el-button style="width: 30%" icon="Plus">新增聊天</el-button>
           </template>
-          <el-scrollbar :height="form.getHeight.substring(7, form.getHeight.length)">
+          <el-scrollbar :height="form.getScrollbarHeight">
             <el-menu
                 default-active="2"
                 class="el-menu-vertical-demo"
@@ -169,7 +169,8 @@ const form = reactive({
     '刀', '足球', '瓢虫', '便便', '月亮', '太阳', '礼物', '拥抱', '强', '弱', '握手', '胜利', '抱拳', '勾引',
     '拳头', '差劲', '爱你', 'NO', 'OK', '爱情', '飞吻', '跳跳', '发抖', '怄火', '转圈', '磕头', '回头', '跳绳', '挥手',
     '激动', '街舞', '献吻', '左太极', '右太极'],
-  getContentHeight:""
+  getContentHeight:"",
+  getScrollbarHeight:""
 });
 interface Chat{
   name:string,
@@ -282,6 +283,7 @@ onMounted(() =>{
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
   form.getContentHeight = "height:" + (window.innerHeight - 310) + "px"
+  form.getScrollbarHeight = (window.innerHeight - 230) + "px"
 }
 const isShow = () =>{
   if (form.emotionIsShow === false) {
