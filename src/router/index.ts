@@ -186,6 +186,14 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'adminManager'
                 },
                 component: () => import (/* webpackChunkName: "markdown" */ '../views/adminManager.vue')
+            }, {
+                path: '/chatBox',
+                name: 'chatBox',
+                meta: {
+                    title: '聊天室',
+                    permiss: 'chatBox'
+                },
+                component: () => import (/* webpackChunkName: "markdown" */ '../views/chatBox.vue')
             }
         ]
     }, {

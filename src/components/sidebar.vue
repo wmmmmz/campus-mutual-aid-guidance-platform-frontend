@@ -202,6 +202,11 @@ const items = [
     index: '/adminManager',
     title: '管理员管理',
     permiss: 'adminManager'
+  }, {
+    icon: 'ChatLineRound',
+    index: '/chatBox',
+    title: '聊天室',
+    permiss: 'chatBox'
   },
 ];
 

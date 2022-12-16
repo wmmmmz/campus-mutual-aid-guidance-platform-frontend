@@ -10,11 +10,11 @@ export const usePermissStore = defineStore('permiss', {
 		return {
 			key: keys ? JSON.parse(keys) : <string[]>[],
 			defaultList: <ObjectList>{
-				superAdmin:['dashboard', 'myMessage', 'adminManager'],
+				superAdmin:['dashboard', 'myMessage', 'adminManager', 'chatBox'],
 				admin: ['dashboard', 'myMessage', '4', '7', '8', '9', '10', '13',
-					'publishNews','hireTeacher','startClass','termManager','courseManager', 'carouselChartManager'],
-				teacher: ['dashboard','myMessage','iTeach','enrollTeach'],
-				student: ['dashboard','myMessage','enrollClass','iLearn','enrollTeach']
+					'publishNews','hireTeacher','startClass','termManager','courseManager', 'carouselChartManager', 'chatBox'],
+				teacher: ['dashboard','myMessage','iTeach','enrollTeach', 'chatBox'],
+				student: ['dashboard','myMessage','enrollClass','iLearn','enrollTeach', 'chatBox']
 			}
 		};
 	},
