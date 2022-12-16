@@ -66,10 +66,10 @@
           <div class="talk">
             <div class="talk-content" :style="form.getContentHeight" >
 
-              <div v-for="item  in contentDiv" style="margin-top: 15px;">
+              <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
 
                 <div style="text-align: center">
-                  <p style="font-size: 1px;color: #9b9b9b"> {{item.time}}</p>
+                  <p v-if="index === 0 || index !== 0 && item.time !== contentDiv[index - 1].time" style="font-size: 1px;color: #9b9b9b"> {{item.time}}</p>
                 </div>
                 <div style="display: flex;">
 
@@ -99,6 +99,7 @@
                      class="content_right" v-if="item.show">
                 </div>
 
+                 <br v-if="item.show"><br v-if="item.show">
               </div>
 
             </div>
@@ -185,7 +186,7 @@ const contentDiv = [
     name:"string",
     url:"string",
     content:"string",
-    show:false,
+    show:true,
     time:"2022-10-10"
   },{
     name:"string",
@@ -197,7 +198,13 @@ const contentDiv = [
     name:"string",
     url:"string",
     content:"string",
-    show:false,
+    show:true,
+    time:"2022-10-10"
+  },{
+    name:"string",
+    url:"string",
+    content:"string",
+    show:true,
     time:"2022-10-10"
   },{
     name:"string",
@@ -209,26 +216,20 @@ const contentDiv = [
     name:"string",
     url:"string",
     content:"string",
-    show:false,
-    time:"2022-10-10"
+    show:true,
+    time:"2022-10-12"
   },{
     name:"string",
     url:"string",
     content:"string",
     show:false,
-    time:"2022-10-10"
+    time:"2022-10-12"
   },{
     name:"string",
     url:"string",
     content:"string",
     show:false,
-    time:"2022-10-10"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:false,
-    time:"2022-10-10"
+    time:"2022-10-12"
   }
 ]
 const studentList = ref<User[]>([])
@@ -389,7 +390,9 @@ watch(
   transform: translate(-10%, -70%)
 }
 .name_right {
-  margin-left: 310px;
+  position: absolute;
+  right: 6%;
+  transform: translateX(-6%);
 }
 
 .name_left {
@@ -397,13 +400,14 @@ watch(
 }
 
 .content_right {
-
+  position: absolute;
+  right: 5%;
+  transform: translate(-5%);
   word-wrap: break-word;
   width: 50%;
-  margin-left: 150px;
   font-size: 10px;
   text-align: right;
-  margin-bottom: 20px;
+  margin-top: 35px;
 }
 
 .content_left {
@@ -412,12 +416,14 @@ watch(
   margin-left: 60px;
   font-size: 10px;
   text-align: left;
-  margin-bottom: 20px;
+
+
 }
 
 .url_right {
-  margin-left: 10px;
-
+  position: absolute;
+  right: 3%;
+  transform: translateX(-3%);
 }
 
 .url-left {
