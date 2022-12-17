@@ -9,7 +9,7 @@
                 filterable
                 remote
                 reserve-keyword
-                placeholder="请输入学生姓名"
+                placeholder="请输入学生姓名或学号"
                 remote-show-suffix
                 :remote-method="remoteMethod"
                 :loading="loading"
@@ -17,37 +17,38 @@
               <el-option
                   v-for="item in options"
                   :key="item.name"
-                  :label="`${item.name}`"
+                  :label="`${item.name}` + ' (' + `${item.stuId}` + '）'"
                   :value="item.stuId"
               />
             </el-select>
-            &nbsp;&nbsp;<el-button style="width: 30%" icon="Plus">新增聊天</el-button>
+            &nbsp;&nbsp;<el-button style="width: 30%" icon="Plus" @click="addConversation(value)">新增聊天</el-button>
           </template>
           <el-scrollbar :height="form.getScrollbarHeight">
             <el-menu
-                default-active="2"
+                default-active="1"
                 class="el-menu-vertical-demo"
                 @select="handleSelect"
             >
-              <el-menu-item  v-for="item in 10" :key="item"  :index="item"
+              <el-menu-item  v-for="item in conversationList" :key="item"  :index="item"
                             style="height:80px;border-bottom: 1px solid #dcdbdb; border-right: none">
 
                 <div style="width: 100%">
                   <el-row>
                     <el-col :span="6">
                       <div class="avatar1">
-                        <el-badge :value="12" class="item">
-                        <el-avatar :size="50" :src="form.imgSrc"/>
+                        <el-badge v-if="item.unreadCnt !== 0" :value="item.unreadCnt" class="item">
+                        <el-avatar :size="50" :src="item.avatar"/>
                         </el-badge>
+                        <el-avatar v-if="item.unreadCnt === 0" :size="50" :src="item.avatar"/>
                       </div>
                     </el-col>
                     <el-col :span="18">
                       <div>
-                      <span class="span1" style="font-size: 15px">王萌哲</span>
-                      <span class="span3">12:11</span>
+                      <span class="span1" style="font-size: 15px">{{ item.name }}</span>
+                      <span class="span3">{{item.latestMessageTime}}</span>
                       </div>
                       <div>
-                      <span class="span2" style="font-size: 13px; width: 70%; text-overflow: ellipsis;overflow: hidden;">你好你好你好你好你好你好你好你好你好</span>
+                      <span class="span2" style="font-size: 13px; width: 70%; text-overflow: ellipsis;overflow: hidden;">{{item.latestMessage}}</span>
                       </div>
                     </el-col>
                   </el-row>
@@ -60,11 +61,11 @@
       <el-col :span="17">
         <el-card shadow="hover" :style="form.getHeight">
           <template #header>
-              <el-avatar :size="50" :src="form.imgSrc"/>
+              <el-avatar :size="50" :src="form.imgSrc" v-if="form.imgSrc"/>
               &nbsp;<span style="font-size: 23px;top: 4%; position: absolute;transform: translateY(-4%);">{{form.name}}</span>
           </template>
           <div class="talk">
-            <div class="talk-content" :style="form.getContentHeight" >
+            <div class="talk-content" id="talk-content" :style="form.getContentHeight + ';overflow:auto'" >
 
               <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
 
@@ -73,33 +74,32 @@
                 </div>
                 <div style="display: flex;">
 
-                  <div class="name_right" v-if="item.show">
-                    <p style="font-size: 1px; "> {{item.name}} </p>
+                  <div class="name_right" v-if="item.myMessage">
+                    <p style="font-size: 15px; "> {{item.name}} </p>
                   </div>
-                  <div class="url_right" v-if="item.show">
-                    <el-avatar shape="circle" :size="30" :src="item.url"></el-avatar>
+                  <div class="url_right" v-if="item.myMessage">
+                    <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
                   </div>
-                  <div class="url-left" v-if="!item.show">
-                    <el-avatar shape="circle" :size="30" :src="item.url"></el-avatar>
+                  <div class="url-left" v-if="!item.myMessage">
+                    <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
                   </div>
 
 
-                  <div class="name_left" v-if="!item.show">
-                    <p style="font-size: 1px;"> {{item.name}} </p>
+                  <div class="name_left" v-if="!item.myMessage">
+                    <p style="font-size: 15px;"> {{item.name}} </p>
                   </div>
 
                 </div>
 
 
                 <div v-html="item.content"
-                     class="content_left" v-if="!item.show">
+                     class="content_left" v-if="!item.myMessage">
                 </div>
 
                 <div v-html="item.content"
-                     class="content_right" v-if="item.show">
+                     class="content_right" v-if="item.myMessage">
                 </div>
 
-                 <br v-if="item.show"><br v-if="item.show">
               </div>
 
             </div>
@@ -135,7 +135,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" defer=true>
 import {onMounted, reactive, ref, watch} from 'vue';
 import Emotion from './emotion.vue'
 import '../utils/iconfont';
@@ -148,15 +148,11 @@ import { ElMessage } from 'element-plus';
 import router from "../router";
 const stuId = localStorage.getItem('stuId');
 const className = localStorage.getItem('className');
-let telephone = localStorage.getItem('telephone');
-const description = localStorage.getItem('description');
-const wx = localStorage.getItem('wx');
-const username = localStorage.getItem('username');
 const role = localStorage.getItem('role');
 const form = reactive({
   getHeight:"",
-  imgSrc: localStorage.getItem('img'),
-  name:"王萌哲",
+  imgSrc: "",
+  name:"",
   emotionIsShow: false,
   url :"https:/rescdn.qqmail.com/node/wwopen/wwopenmng/images/qq_emotion/qq/",
   textarea:"",
@@ -171,67 +167,26 @@ const form = reactive({
     '拳头', '差劲', '爱你', 'NO', 'OK', '爱情', '飞吻', '跳跳', '发抖', '怄火', '转圈', '磕头', '回头', '跳绳', '挥手',
     '激动', '街舞', '献吻', '左太极', '右太极'],
   getContentHeight:"",
-  getScrollbarHeight:""
+  getScrollbarHeight:"",
+  stuId:""
 });
 interface Chat{
   name:string,
-  url:string,
+  avatar:string,
   content:string,
-  show:true,
+  myMessage:true,
   time:string
 }
-// const contentDiv = ref<Chat>()
-const contentDiv = [
-  {
-    name:"string",
-    url:"string",
-    content:"string",
-    show:true,
-    time:"2022-10-10"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:false,
-    time:"2022-10-10"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:true,
-    time:"2022-10-10"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:true,
-    time:"2022-10-10"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:false,
-    time:"2022-10-10"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:true,
-    time:"2022-10-12"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:false,
-    time:"2022-10-12"
-  },{
-    name:"string",
-    url:"string",
-    content:"string",
-    show:false,
-    time:"2022-10-12"
-  }
-]
+interface Conversation{
+  name:string,
+  avatar:string,
+  stuId:string,
+  latestMessage:string,
+  unreadCnt:number,
+  latestMessageTime:string
+}
+const conversationList = ref<Conversation>()
+const contentDiv = ref<Chat>()
 const studentList = ref<User[]>([])
 interface User {
   name: string
@@ -239,11 +194,13 @@ interface User {
   className:string
   tel: string
   wx: string
-  locked: any
+  locked: any,
+  role:string
 }
 interface ListItem {
   name: string
-  stuId: string
+  stuId: string,
+  role:string
 }
 
 const list = ref<ListItem[]>([])
@@ -266,17 +223,34 @@ const remoteMethod = (query: string) => {
   }
 }
 const getStudentList = () => {
-  axios.get('/user/getStudentList').then(re =>{
+  axios.get('/user/getUserList').then(re =>{
     if (re.data.code == 200){
       studentList.value = re.data.data
       list.value = studentList.value.map((item) => {
-        return { name: `${item.name}`, stuId: `${item.stuId}` }
+        return { name: `${item.name}`, stuId: `${item.stuId}`, role: `${item.role}`}
       })
     }
   })
 }
-const handleSelect = (key: string) => {
-  console.log(key)
+const handleSelect = (key: Conversation) => {
+  form.imgSrc = key.avatar
+  form.name = key.name
+  form.stuId = key.stuId
+  clearUnreadCnt(key.stuId)
+  getMessageList(key.stuId)
+}
+const clearUnreadCnt = (stuId: string) => {
+  const data = {
+    stuId: stuId,
+    myStuId: localStorage.getItem('stuId')
+  }
+  axios.post('/chat/clearUnreadCnt', data).then(re => {
+    if (re.data.code === 200){
+      getConversationList()
+    }else {
+      ElMessage.error(re.data.message)
+    }
+  })
 }
 onMounted(() =>{
   window.addEventListener("resize", getHeight);
@@ -337,25 +311,78 @@ const submit = () => {
     "time": "2021-7-12 17:12:12"
   };
 
-  let d = {
-    "name": "糖醋里脊",
-    "url": "https://img0.baidu.com/it/u=1741172190,3962404342&fm=26&fmt=auto&gp=0.jpg",
-    "content": "大佬你好啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
-    "show": false,
-    "time": "2021-7-12 17:12:46"
-  };
-
   form.textarea = "";
   form.textarea1 = "";
-  contentDiv.push(c);
-  contentDiv.push(d);
+  saveMessage(a)
+}
+const saveMessage = (content:string) => {
+  const data = {
+    content: content,
+    stuId: form.stuId,
+    myStuId: localStorage.getItem('stuId')
+  }
+  axios.post('/chat/saveMessage', data).then(re => {
+    if (re.data.code === 200){
+      getMessageList(form.stuId)
+      getConversationList()
+    }else{
+      ElMessage.error(re.data.message)
+    }
+  })
+}
+const addConversation = (stuId: string) => {
+    const data = {
+      stuId: stuId,
+      myStuId: localStorage.getItem('stuId')
+    }
+    axios.post('/chat/createConversation', data).then(re => {
+      if (re.data.code === 200){
+        ElMessage.success("创建成功")
+        getConversationList()
+      }else{
+        ElMessage.error(re.data.message)
+      }
+    })
+  value.value = []
+}
+const getConversationList = () => {
+  const data = {
+    stuId : localStorage.getItem('stuId')
+  }
+  axios.get('/chat/getMyConversation', {params:data}).then(re => {
+    if (re.data.code === 200){
+      conversationList.value = re.data.data
+    }else{
+      ElMessage.error(re.data.message)
+    }
+  })
+}
+const getMessageList = (stuId : string) => {
+  const data = {
+    stuId : stuId,
+    myStuId: localStorage.getItem('stuId')
+  }
+  axios.get('/chat/getMessageList', {params:data}).then(re => {
+    if (re.data.code === 200){
+      contentDiv.value = re.data.data;
+    }else{
+      ElMessage.error(re.data.message)
+    }
+  })
 }
 watch(
 
     () => router.currentRoute.value.path,
 
     (newValue, oldValue) => {
+      getHeight()
       getStudentList()
+      getConversationList()
+      let div = document.getElementById('talk-content')
+      console.log("div" + div)
+      if (div){
+        div.scrollTop =  div.scrollHeight;
+      }
     },
 
     { immediate: true }
@@ -390,9 +417,7 @@ watch(
   transform: translate(-10%, -70%)
 }
 .name_right {
-  position: absolute;
-  right: 6%;
-  transform: translateX(-6%);
+  margin-left: 92%;
 }
 
 .name_left {
@@ -400,30 +425,75 @@ watch(
 }
 
 .content_right {
-  position: absolute;
-  right: 5%;
-  transform: translate(-5%);
   word-wrap: break-word;
-  width: 50%;
-  font-size: 10px;
+  width: 30%;
   text-align: right;
-  margin-top: 35px;
+  margin-left: 62%;
+  font-size: 13px;
+  margin-bottom: 20px;
 }
+
 
 .content_left {
   word-wrap: break-word;
-  width: 50%;
+  width: 30%;
   margin-left: 60px;
-  font-size: 10px;
+  font-size: 13px;
   text-align: left;
-
-
+  margin-bottom: 20px;
 }
-
+/*.content_right{*/
+/*  position: relative;*/
+/*  width: 30%;*/
+/*  min-height: 21px;*/
+/*  background: var(--el-color-primary-light-9);*/
+/*  border-radius: 5px;*/
+/*  margin-left: 62%;*/
+/*  word-break: break-word;*/
+/*  color: black;*/
+/*  padding: 7px;*/
+/*  text-align: right;*/
+/*  font-size: 13px;*/
+/*  margin-bottom: 20px;*/
+/*}*/
+/*.content_right::after {*/
+/*  content: "";*/
+/*  display: block;*/
+/*  position: absolute;*/
+/*  width: 0;*/
+/*  height: 0;*/
+/*  border: 8px solid transparent;*/
+/*  border-left-color: var(--el-color-primary-light-9);*/
+/*  top: 0px;*/
+/*  right: -13px;*/
+/*}*/
+/*.content_left{*/
+/*  position: relative;*/
+/*  width: 30%;*/
+/*  min-height: 21px;*/
+/*  background: var(--el-color-primary-light-9);*/
+/*  border-radius: 5px;*/
+/*  margin-left: 60px;*/
+/*  word-break: break-word;*/
+/*  color: black;*/
+/*  padding: 7px;*/
+/*  text-align: left;*/
+/*  font-size: 13px;*/
+/*  margin-bottom: 20px;*/
+/*}*/
+/*.content_left::after {*/
+/*  content: "";*/
+/*  display: block;*/
+/*  position: absolute;*/
+/*  width: 0;*/
+/*  height: 0;*/
+/*  border: 8px solid transparent;*/
+/*  border-right-color: var(--el-color-primary-light-9);*/
+/*  top: 0px;*/
+/*  left: -13px;*/
+/*}*/
 .url_right {
-  position: absolute;
-  right: 3%;
-  transform: translateX(-3%);
+  margin-left: 7px;
 }
 
 .url-left {
@@ -513,8 +583,11 @@ watch(
 }
 
 .talk-content {
-  overflow-y: auto;
+  /*overflow-y: auto;*/
   height: 90%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .talk-message {
