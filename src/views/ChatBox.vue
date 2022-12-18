@@ -48,7 +48,8 @@
                       <span class="span3">{{item.latestMessageTime}}</span>
                       </div>
                       <div>
-                      <span class="span2" style="font-size: 13px; width: 70%; text-overflow: ellipsis;overflow: hidden;">{{item.latestMessage}}</span>
+                      <div class="span2" v-html="item.latestMessage"
+                            style="font-size: 13px; width: 70%; text-overflow: ellipsis;overflow: hidden;"></div>
                       </div>
                     </el-col>
                   </el-row>
@@ -65,7 +66,9 @@
               &nbsp;<span style="font-size: 23px;top: 4%; position: absolute;transform: translateY(-4%);">{{form.name}}</span>
           </template>
           <div class="talk">
-            <div class="talk-content" id="talk-content" :style="form.getContentHeight + ';overflow:auto'" >
+            <el-empty :image-size="700" :image="EmptyBackground" :style="form.getContentHeight + ';overflow:auto'"
+                      v-if="!form.name"  description="have a nice day ~"/>
+            <div v-if="form.name" class="talk-content" id="talk-content" :style="form.getContentHeight + ';overflow:auto'" >
 
               <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
 
@@ -105,7 +108,7 @@
             </div>
 
 
-            <div class=" talk-message">
+            <div v-if="form.name" class=" talk-message">
 
               <div class="talk-message-face">
                 <svg class="icon" aria-hidden="true" @click="isShow">
@@ -139,6 +142,7 @@
 import {onMounted, reactive, ref, watch} from 'vue';
 import Emotion from './emotion.vue'
 import '../utils/iconfont';
+import EmptyBackground from '../assets/img/chat_bg.jpg'
 import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
@@ -168,7 +172,7 @@ const form = reactive({
     '激动', '街舞', '献吻', '左太极', '右太极'],
   getContentHeight:"",
   getScrollbarHeight:"",
-  stuId:""
+  stuId:"",
 });
 interface Chat{
   name:string,
@@ -238,6 +242,7 @@ const handleSelect = (key: Conversation) => {
   form.stuId = key.stuId
   clearUnreadCnt(key.stuId)
   getMessageList(key.stuId)
+
 }
 const clearUnreadCnt = (stuId: string) => {
   const data = {
@@ -254,6 +259,7 @@ const clearUnreadCnt = (stuId: string) => {
 }
 onMounted(() =>{
   window.addEventListener("resize", getHeight);
+  connectWebSocket()
 })
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
@@ -303,17 +309,10 @@ const submit = () => {
 
   }
 
-  let c = {
-    "name": "锅包肉",
-    "url": "https://img0.baidu.com/it/u=3953639057,245238928&fm=15&fmt=auto&gp=0.jpg",
-    "content": a,
-    "show": true,
-    "time": "2021-7-12 17:12:12"
-  };
-
   form.textarea = "";
   form.textarea1 = "";
-  saveMessage(a)
+  // saveMessage(a)
+  sendMessage(a)
 }
 const saveMessage = (content:string) => {
   const data = {
@@ -370,19 +369,80 @@ const getMessageList = (stuId : string) => {
     }
   })
 }
+let websocket: WebSocket
+const sendMessage = (content : string) => {
+  var socketMsg = { msg: content, toUser: form.stuId, fromUser: localStorage.getItem('stuId') };
+  // if (this.aisle == "") {
+  //   //群聊.
+  //   socketMsg.type = 0;
+  // } else {
+  //   //单聊.
+  //   socketMsg.type = 1;
+  // }
+  websocket.send(JSON.stringify(socketMsg));
+}
+const connectWebSocket = () => {
+  console.log("建立连接");
+    //判断当前浏览器是否支持WebSocket
+    if ("WebSocket" in window) {
+      websocket = new WebSocket(
+          "ws://127.0.0.1:8084/websocket/" + localStorage.getItem('stuId')
+      );
+      //连接发生错误的回调方法
+      websocket.onerror = function() {
+        console.log("error")
+      };
+      //连接成功建立的回调方法
+      websocket.onopen = function(event) {
+        console.log("open")
+      };
+      //接收到消息的回调方法
+      // var that = this;
+      websocket.onmessage = function(event) {
+        var object = eval("(" + event.data + ")");
+        console.log(event.data);
+        if (object.type == 0) {
+          console.log("getConversationList");
+          conversationList.value = object.myConversation
+          // that.showInfo(object.people, object.aisle);
+        }
+        if (object.type == 1) {
+          console.log("getMessageList");
+          if(object.toUser === form.stuId){
+            contentDiv.value = object.myMessage;
+            clearUnreadCnt(form.stuId)
+            object.myConversation.forEach((conversation: Conversation ) => {
+              if (conversation.stuId === form.stuId){
+                conversation.unreadCnt = 0
+              }
+            })
+          }
+          conversationList.value = object.myConversation
+          // that.messageList.push(object);
+        }
+      };
+      //连接关闭的回调方法
+      websocket.onclose = function() {};
+      //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+      window.onbeforeunload = function() {
+        websocket.close();
+      };
+
+    } else {
+      alert("不支持建立socket连接");
+    }
+
+
+}
 watch(
 
     () => router.currentRoute.value.path,
 
     (newValue, oldValue) => {
+      // connectWebSocket()
       getHeight()
       getStudentList()
-      getConversationList()
-      let div = document.getElementById('talk-content')
-      console.log("div" + div)
-      if (div){
-        div.scrollTop =  div.scrollHeight;
-      }
+      // getConversationList()
     },
 
     { immediate: true }
