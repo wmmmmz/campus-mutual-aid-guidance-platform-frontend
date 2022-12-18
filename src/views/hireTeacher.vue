@@ -111,9 +111,9 @@
                 <el-form-item v-if="form.statusChoose == '面试通过'" class="blueItem" label="提示：">
                   <p style="color: #2d8cf0">系统将自动向该同学发送确认offer通知<br>请关注 我的消息 查看学生选择结果。</p>
                 </el-form-item>
-                <el-form-item v-if="form.statusChoose == '流程中断'" label="原因：">
+                <el-form-item v-if="form.statusChoose == '流程终止'" label="原因：">
                   <p v-if="scope.row.remark">{{scope.row.remark}}</p>
-                  <el-input v-if="!scope.row.remark" v-model="form.reason" style="width: 260px" placeholder="请输入流程中断原因"></el-input>
+                  <el-input v-if="!scope.row.remark" v-model="form.reason" style="width: 260px" placeholder="请输入流程终止原因"></el-input>
                 </el-form-item>
               </el-form>
               <template #footer>
@@ -187,7 +187,6 @@ let statusData = [
   {value:'报名成功', disabled:false},
   {value:'安排面试', disabled:false},
   {value:'面试通过', disabled:false},
-  {value:'流程中断', disabled:false},
   {value:'流程终止', disabled:false},
 ]
 const form = reactive({
@@ -227,7 +226,7 @@ const handleCurrentChange = (val: number) => {
 }
 const handleChange = (row : TeachEnroll) => {
   statusData.forEach((stats : any) => {
-      stats.disable = false
+      stats.disabled = false
   })
   form.statusChoose = row.status
   if (form.statusChoose == '安排面试'){
@@ -247,8 +246,7 @@ const handleChange = (row : TeachEnroll) => {
     })
   }else if(form.statusChoose == '流程终止'){
     statusData.forEach((stats : any) => {
-      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '面试通过'
-          || stats.value == '流程中断')
+      if (stats.value == '报名成功' || stats.value == '安排面试' || stats.value == '面试通过')
         stats.disabled = true
     })
   }
@@ -258,7 +256,6 @@ const handleChange = (row : TeachEnroll) => {
     form.interViewUrl = row.interviewLink.substring(row.interviewLink.length - 9, row.interviewLink.length)
   else
     form.interViewUrl = ''
-  console.log(form.interViewUrl)
 }
 const inputChange = () => {
   getTeachEnrollDataList()
@@ -302,7 +299,7 @@ const handleEnroll = (row : TeachEnroll, index : number) => {
         ElMessage.error(re.data.message)
       }
     })
-  }else if (form.statusChoose == '流程中断'){
+  }else if (form.statusChoose == '流程终止'){
     axios.post('/teachEnroll/updateStatusToInterrupted', data).then(re => {
       if (re.data.code == 200){
         ElNotification({
