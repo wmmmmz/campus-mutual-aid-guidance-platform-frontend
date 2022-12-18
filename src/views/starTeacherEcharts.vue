@@ -50,6 +50,9 @@ const getStarTeacher = () => {
           data: re.data.data['teacherName'],
           nameTextStyle: {
             padding: [0, 0, 0, -10]     // 四个数字分别为上右下左与原位置距离
+          },
+          "axisLabel":{
+            interval: 0
           }
         },
         yAxis: {
