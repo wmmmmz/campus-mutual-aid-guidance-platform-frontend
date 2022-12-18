@@ -56,7 +56,9 @@
         </el-table-column>
         <el-table-column label="上课地点" min-width="8%" >
           <template #default="scope">
-            <p>{{scope.row.room.roomName}}</p>
+              <el-link type="primary" v-if="scope.row.room.roomName === '腾讯会议'" @click="classroomLink(scope.row.tencentMeeting)">{{ scope.row.room.roomName }}</el-link>
+              <el-link v-else>{{ scope.row.room.roomName }}</el-link>
+<!--            <p>{{scope.row.room.roomName}}</p>-->
           </template>
         </el-table-column>
         <el-table-column label="腾讯会议号" min-width="8%" >
@@ -186,7 +188,9 @@ const inputChange = () => {
 }
 
 let termData = ref<termNameList>()
-
+const classroomLink = (link : string) => {
+  window.open("https://meeting.tencent.com/user-center/joining?meeting_code=" + link);
+}
 const getTermToday = () => {
   axios.get('/term/getTermToday').then(re => {
     if (re.data.code == 200){
