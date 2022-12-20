@@ -73,7 +73,7 @@
               <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
 
                 <div style="text-align: center">
-                  <p v-if="index === 0 || index !== 0 && item.time !== contentDiv[index - 1].time" style="font-size: 1px;color: #9b9b9b"> {{item.time}}</p>
+                  <p v-if="index === form.totalCnt - 1 || index !== 0 && item.time !== contentDiv[index + 1].time" style="font-size: 1px;color: #9b9b9b"> {{item.time}}</p>
                 </div>
                 <div style="display: flex;">
 
@@ -96,11 +96,17 @@
 
 
                 <div v-html="item.content"
-                     class="content_left" v-if="!item.myMessage">
+                     class="content_left" v-if="!item.myMessage && !item.isImg">
+                </div>
+                <div class="content_left" v-if="!item.myMessage && item.isImg">
+                  <el-image :preview-src-list="item.srcList" :src="item.imgBase64"/>
                 </div>
 
                 <div v-html="item.content"
-                     class="content_right" v-if="item.myMessage">
+                     class="content_right" v-if="item.myMessage && !item.isImg">
+                </div>
+                <div class="content_right" v-if="item.myMessage && item.isImg">
+                  <el-image :src="item.imgBase64" :preview-src-list="item.srcList"/>
                 </div>
 
               </div>
@@ -110,24 +116,35 @@
 
             <div v-if="form.name" class=" talk-message">
 
+                <div class="talk-message-content">
+
+                  <el-input
+                      v-model="form.textarea"
+                      resize="none"
+                      type="textarea"
+                      rows="1"
+                      @keyup.enter.native="submit"
+                  ></el-input>
+                </div>
+                <div class="talk-message-send">
+                  <el-button type="text" style="color:#9b9b9b" @click="submit">发送</el-button>
+                </div>
+
+              </div>
+            <div v-if="form.name" class="talk-extra">
               <div class="talk-message-face">
                 <svg class="icon" aria-hidden="true" @click="isShow">
                   <use xlink:href="#icon-biaoqing"></use>
                 </svg>
                 <Emotion :emotionIsShow="form.emotionIsShow" @sendEmotionSelect="getValue"></Emotion>
               </div>
-              <div class="talk-message-content">
-
-                <el-input
-                    v-model="form.textarea"
-                    resize="none"
-                    type="textarea"
-                    rows="1"
-                    @keyup.enter.native="submit"
-                ></el-input>
-              </div>
-              <div class="talk-message-send">
-                <el-button type="text" style="color:#9b9b9b" @click="submit">发送</el-button>
+              <div v-if="form.name" class="talk-img">
+                <el-upload v-model:file-list="form.pictureList" class="upload-demo" action="" :before-upload="BeforeUpload"
+                           :http-request="Upload" list-type="picture"
+                           :on-preview="handlePreview"
+                           :on-remove="handleRemove" :on-change="handleChange">
+                  <el-button round  plain icon="Picture" @click="form.isImg = true"></el-button>
+                </el-upload>
               </div>
             </div>
 
@@ -148,8 +165,10 @@ import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
 import axios from "axios";
 import {useRoute} from "vue-router";
-import { ElMessage } from 'element-plus';
+import {ElMessage} from 'element-plus';
+import type { UploadProps, UploadUserFile } from 'element-plus'
 import router from "../router";
+import {push} from "echarts/types/src/component/dataZoom/history";
 const stuId = localStorage.getItem('stuId');
 const className = localStorage.getItem('className');
 const role = localStorage.getItem('role');
@@ -173,13 +192,24 @@ const form = reactive({
   getContentHeight:"",
   getScrollbarHeight:"",
   stuId:"",
+  newFile:new FormData(),
+  tempFilePath:[""],
+  suffixName:[""],
+  isImg:false,
+  pictureForm:new FormData(),
+  pictureList:[],
+  totalCnt:0
 });
+let beforeUploadFile : any
 interface Chat{
   name:string,
   avatar:string,
   content:string,
   myMessage:true,
-  time:string
+  time:string,
+  isImg:boolean,
+  imgBase64:string,
+  srcList:[]
 }
 interface Conversation{
   name:string,
@@ -208,6 +238,7 @@ interface ListItem {
 }
 
 const list = ref<ListItem[]>([])
+const fileArr = ref<any[]>([])
 const options = ref<ListItem[]>([])
 const value = ref<string[]>([])
 const loading = ref(false)
@@ -236,6 +267,24 @@ const getStudentList = () => {
     }
   })
 }
+const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
+  for (let i = 0; i < form.tempFilePath.length; i++) {
+    var split = form.tempFilePath[i].split("_")
+    //如果传入的文件uid和即将提交的图片数组中的某个uid一致，那么移除此图片
+    if (uploadFile.raw && uploadFile.raw.uid === parseInt(split[1])) {
+      form.tempFilePath.splice(i, 1);
+      form.suffixName.splice(i, 1)
+    }
+  }
+  form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 100) + "px"
+}
+const handlePreview: UploadProps['onPreview'] = (file) => {
+  console.log("preview" + file)
+}
+const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
+  fileArr.value.push(uploadFile.raw)
+
+}
 const handleSelect = (key: Conversation) => {
   form.imgSrc = key.avatar
   form.name = key.name
@@ -263,7 +312,7 @@ onMounted(() =>{
 })
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
-  form.getContentHeight = "height:" + (window.innerHeight - 310) + "px"
+  form.getContentHeight = "height:" + (window.innerHeight - 360) + "px"
   form.getScrollbarHeight = (window.innerHeight - 230) + "px"
 }
 const isShow = () =>{
@@ -313,6 +362,41 @@ const submit = () => {
   form.textarea1 = "";
   // saveMessage(a)
   sendMessage(a)
+
+
+
+  form.isImg = false
+  form.tempFilePath = [""]
+  form.suffixName = [""]
+  form.pictureList = []
+
+  getHeight()
+}
+const BeforeUpload = (file : any) => {
+    if(file){
+      const suffix = file.name.substring(file.name.lastIndexOf('.') + 1)
+      if (suffix !== 'jpg' && suffix !== 'png' && suffix !== 'jpeg'){
+        ElMessage.error("不支持上传此格式图片")
+        return false;
+      }
+      beforeUploadFile = file
+      form.newFile.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
+    }else{
+      return false;
+    }
+}
+const Upload = () => {
+    axios.post('/nginx/uploadByAction', form.newFile).then(re => {
+      if (re.data.code == 200) {
+        form.tempFilePath.push( re.data.data.path + "_" + beforeUploadFile.uid )
+        console.log(form.tempFilePath)
+        form.suffixName.push( re.data.data.suffixName )
+        form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 100) + "px"
+      }else {
+        ElMessage.error(re.data.message)
+      }
+    })
+    form.newFile = new FormData()
 }
 const saveMessage = (content:string) => {
   const data = {
@@ -364,6 +448,7 @@ const getMessageList = (stuId : string) => {
   axios.get('/chat/getMessageList', {params:data}).then(re => {
     if (re.data.code === 200){
       contentDiv.value = re.data.data;
+      form.totalCnt = re.data.data.length
     }else{
       ElMessage.error(re.data.message)
     }
@@ -371,7 +456,21 @@ const getMessageList = (stuId : string) => {
 }
 let websocket: WebSocket
 const sendMessage = (content : string) => {
-  var socketMsg = { msg: content, toUser: form.stuId, fromUser: localStorage.getItem('stuId') };
+  // for (var i = 0; i < fileArr.value.length; i++) {
+  //   console.log(fileArr.value[i])
+  //   form.pictureForm.append("files",fileArr.value[i]);
+  // }
+  for(let i = 0; i < form.tempFilePath.length; i++){
+    const split = form.tempFilePath[i].split("_")
+    form.tempFilePath[i] = split[0]
+  }
+  var socketMsg = {
+    tempFilePath: form.tempFilePath,
+    suffixName: form.suffixName,
+    msg: content,
+    toUser: form.stuId,
+    isImg:form.isImg,
+    fromUser: localStorage.getItem('stuId') };
   // if (this.aisle == "") {
   //   //群聊.
   //   socketMsg.type = 0;
@@ -379,6 +478,7 @@ const sendMessage = (content : string) => {
   //   //单聊.
   //   socketMsg.type = 1;
   // }
+  console.log(JSON.stringify(socketMsg))
   websocket.send(JSON.stringify(socketMsg));
 }
 const connectWebSocket = () => {
@@ -400,7 +500,6 @@ const connectWebSocket = () => {
       // var that = this;
       websocket.onmessage = function(event) {
         var object = eval("(" + event.data + ")");
-        console.log(event.data);
         if (object.type == 0) {
           console.log("getConversationList");
           conversationList.value = object.myConversation
@@ -410,6 +509,9 @@ const connectWebSocket = () => {
           console.log("getMessageList");
           if(object.toUser === form.stuId){
             contentDiv.value = object.myMessage;
+            const list = object.myMessage as Array<Chat>
+            form.totalCnt = list.length
+            console.log(contentDiv.value)
             clearUnreadCnt(form.stuId)
             object.myConversation.forEach((conversation: Conversation ) => {
               if (conversation.stuId === form.stuId){
@@ -477,7 +579,7 @@ watch(
   transform: translate(-10%, -70%)
 }
 .name_right {
-  margin-left: 92%;
+  margin-left: 88%;
 }
 
 .name_left {
@@ -655,13 +757,19 @@ watch(
   height: 50px;
   display: flex;
 }
-
+.talk-extra{
+  height: 10px;
+  display: flex;
+}
 .talk-message-face {
   width: 40px;
   padding-left: 2px;
   padding-top: 10px;
 }
-
+.talk-img{
+  width: 100%;
+  padding-top: 20px;
+}
 .talk-message-content {
   padding-top: 20px;
   padding-bottom: 20px;
