@@ -127,14 +127,11 @@
                       @keyup.enter.native="submit"
                   ></el-input>
                 </div>
-                <div class="talk-message-send">
-                  <el-button type="text" style="color:#9b9b9b" @click="submit">发送</el-button>
-                </div>
 
               </div>
             <div v-if="form.name" class="talk-extra">
               <div class="talk-message-face">
-                <svg class="icon" aria-hidden="true" @click="isShow">
+                <svg class="icon" aria-hidden="true" style="color:#9b9b9b" @click="isShow">
                   <use xlink:href="#icon-biaoqing"></use>
                 </svg>
                 <Emotion :emotionIsShow="form.emotionIsShow" @sendEmotionSelect="getValue"></Emotion>
@@ -144,8 +141,19 @@
                            :http-request="Upload" list-type="picture"
                            :on-preview="handlePreview"
                            :on-remove="handleRemove" :on-change="handleChange">
-                  <el-button round  plain icon="Picture" @click="form.isImg = true"></el-button>
+                  <el-button  type="text" style="color:#9b9b9b" @click="form.isImg = true">
+                    <el-icon :size="22">
+                      <Picture />
+                    </el-icon>
+                  </el-button>
                 </el-upload>
+              </div>
+              <div class="talk-message-send">
+                <el-button type="text" style="color:#9b9b9b" @click="submit">
+                  <el-icon :size="22">
+                    <Position />
+                  </el-icon>
+                </el-button>
               </div>
             </div>
 
@@ -313,7 +321,7 @@ onMounted(() =>{
 })
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
-  form.getContentHeight = "height:" + (window.innerHeight - 270 - form.tempFilePath.length * 100) + "px"
+  form.getContentHeight = "height:" + (window.innerHeight - 260 - form.tempFilePath.length * 100) + "px"
   form.getScrollbarHeight = (window.innerHeight - 230) + "px"
 }
 const isShow = () =>{
@@ -374,9 +382,13 @@ const submit = () => {
   getHeight()
 }
 const BeforeUpload = (file : any) => {
+  if (form.tempFilePath.length > 3){
+    ElMessage.warning("一次最多发送三张图片")
+    return false;
+  }
     if(file){
       const suffix = file.name.substring(file.name.lastIndexOf('.') + 1)
-      if (suffix !== 'jpg' && suffix !== 'png' && suffix !== 'jpeg'){
+      if (suffix.toLowerCase() !== 'jpg' && suffix.toLowerCase() !== 'png' && suffix.toLowerCase() !== 'jpeg'){
         ElMessage.error("不支持上传此格式图片")
         return false;
       }
@@ -766,22 +778,22 @@ watch(
 .talk-message-face {
   width: 40px;
   padding-left: 2px;
-  padding-top: 10px;
+  /*padding-top: 10px;*/
 }
 .talk-img{
   width: 100%;
-  padding-top: 20px;
+  padding-top: 10px;
 }
 .talk-message-content {
   padding-top: 20px;
-  padding-bottom: 20px;
   width: 100%;
-  height: 100px;
+  height: 25px;
 }
 
 .talk-message-send {
-  padding-top: 17px;
+  padding-top: 25px;
   width: 90px;
+  /*height: 25px;*/
   display: flex;
   align-items: center;
   justify-content: center;
