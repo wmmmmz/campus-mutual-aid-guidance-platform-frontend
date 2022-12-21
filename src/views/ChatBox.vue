@@ -73,7 +73,8 @@
               <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
 
                 <div style="text-align: center">
-                  <p v-if="index === form.totalCnt - 1 || index !== 0 && item.time !== contentDiv[index + 1].time" style="font-size: 1px;color: #9b9b9b"> {{item.time}}</p>
+                  <p v-if="index === form.totalCnt - 1 || index !== form.totalCnt - 1 && item.time !== contentDiv[index + 1].time"
+                     style="font-size: 10px;color: #9b9b9b"> {{item.time}}</p>
                 </div>
                 <div style="display: flex;">
 
@@ -276,7 +277,7 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
       form.suffixName.splice(i, 1)
     }
   }
-  form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 100) + "px"
+  getHeight()
 }
 const handlePreview: UploadProps['onPreview'] = (file) => {
   console.log("preview" + file)
@@ -312,7 +313,7 @@ onMounted(() =>{
 })
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
-  form.getContentHeight = "height:" + (window.innerHeight - 360) + "px"
+  form.getContentHeight = "height:" + (window.innerHeight - 270 - form.tempFilePath.length * 100) + "px"
   form.getScrollbarHeight = (window.innerHeight - 230) + "px"
 }
 const isShow = () =>{
@@ -361,15 +362,15 @@ const submit = () => {
   form.textarea = "";
   form.textarea1 = "";
   // saveMessage(a)
-  sendMessage(a)
-
-
-
-  form.isImg = false
-  form.tempFilePath = [""]
-  form.suffixName = [""]
-  form.pictureList = []
-
+  if (!form.isImg && a == "" || a == null || a == undefined && form.tempFilePath.length === 0){
+    ElMessage.error("请先输入")
+  }else{
+    sendMessage(a)
+    form.isImg = false
+    form.tempFilePath = [""]
+    form.suffixName = [""]
+    form.pictureList = []
+  }
   getHeight()
 }
 const BeforeUpload = (file : any) => {
@@ -391,7 +392,7 @@ const Upload = () => {
         form.tempFilePath.push( re.data.data.path + "_" + beforeUploadFile.uid )
         console.log(form.tempFilePath)
         form.suffixName.push( re.data.data.suffixName )
-        form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 100) + "px"
+        getHeight()
       }else {
         ElMessage.error(re.data.message)
       }
@@ -511,7 +512,8 @@ const connectWebSocket = () => {
             contentDiv.value = object.myMessage;
             const list = object.myMessage as Array<Chat>
             form.totalCnt = list.length
-            console.log(contentDiv.value)
+            console.log("totalCnt" + form.totalCnt)
+            // console.log(contentDiv.value)
             clearUnreadCnt(form.stuId)
             object.myConversation.forEach((conversation: Conversation ) => {
               if (conversation.stuId === form.stuId){
