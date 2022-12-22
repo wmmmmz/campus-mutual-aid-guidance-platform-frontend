@@ -120,7 +120,7 @@
                 <div class="talk-message-content">
 
                   <el-input
-                      :disabled="form.pictureList.length !== 0"
+                      :disabled="form.fileList.length !== 0"
                       v-model="form.textarea"
                       resize="none"
                       type="textarea"
@@ -132,7 +132,7 @@
               </div>
             <div v-if="form.name" class="talk-extra">
               <div class="talk-message-face">
-                <el-button  type="text" :disabled="form.pictureList.length !== 0" @click="isShow">
+                <el-button  type="text" :disabled="form.fileList.length !== 0" @click="isShow">
                 <svg class="icon" aria-hidden="true" style="color:#9b9b9b">
                   <use xlink:href="#icon-biaoqing"></use>
                 </svg>
@@ -140,13 +140,12 @@
                 <Emotion :emotionIsShow="form.emotionIsShow" @sendEmotionSelect="getValue"></Emotion>
               </div>
               <div v-if="form.name" class="talk-img">
-                <el-upload v-model:file-list="form.pictureList" class="upload-demo" action="" :before-upload="BeforeUploadPicture"
-                           :http-request="UploadPicture" list-type="picture"
-                           :on-preview="handlePreviewPicture"
-                           :on-remove="handleRemovePicture" :on-change="handleChangePicture">
-                  <el-button  type="text" style="color:#9b9b9b" @click="form.isImg = true">
+                <el-upload v-model:file-list="form.fileList" class="upload-demo" action="" :before-upload="BeforeUpload"
+                           :http-request="Upload"
+                           :on-remove="handleRemove">
+                  <el-button  type="text" style="color:#9b9b9b" @click="form.isFile = true">
                     <el-icon :size="20">
-                      <Picture />
+                      <Folder />
                     </el-icon>
                   </el-button>
                 </el-upload>
@@ -204,15 +203,13 @@ const form = reactive({
   getContentHeight:"",
   getScrollbarHeight:"",
   stuId:"",
-  // newFile:new FormData(),
-  newPicture:new FormData(),
+  newFile:new FormData(),
   tempFilePath:[""],
   suffixName:[""],
-  isImg:false,
-  pictureForm:new FormData(),
-  pictureList:[],
+  isFile:false,
+  fileList:[],
   totalCnt:0,
-  storePicture: []
+  dialogVisible:false
 });
 let beforeUploadFile : any
 interface Chat{
@@ -222,6 +219,7 @@ interface Chat{
   myMessage:true,
   time:string,
   isImg:boolean,
+  isFile:boolean,
   imgBase64:string,
   srcList:[]
 }
@@ -281,7 +279,7 @@ const getStudentList = () => {
     }
   })
 }
-const handleRemovePicture: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
+const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
   for (let i = 0; i < form.tempFilePath.length; i++) {
     var split = form.tempFilePath[i].split("_")
     //如果传入的文件uid和即将提交的图片数组中的某个uid一致，那么移除此图片
@@ -326,7 +324,7 @@ onMounted(() =>{
 })
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
-  form.getContentHeight = "height:" + (window.innerHeight - 260 - form.tempFilePath.length * 100) + "px"
+  form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 50) + "px"
   form.getScrollbarHeight = (window.innerHeight - 230) + "px"
 }
 const isShow = () =>{
@@ -375,46 +373,48 @@ const submit = () => {
   form.textarea = "";
   form.textarea1 = "";
   // saveMessage(a)
-  if (!form.isImg && a == "" || a == null || a == undefined && form.tempFilePath.length === 0){
+  if (!form.isFile && a == "" || a == null || a == undefined && form.tempFilePath.length === 0){
     ElMessage.error("请先输入")
   }else{
     sendMessage(a)
-    form.isImg = false
+    form.isFile = false
     form.tempFilePath = [""]
     form.suffixName = [""]
-    form.pictureList = []
+    form.fileList = []
   }
   getHeight()
 }
-const BeforeUploadPicture = (file : any) => {
+const BeforeUpload = (file : any) => {
   if (form.tempFilePath.length > 3){
     ElMessage.warning("一次最多发送三张图片")
     return false;
   }
     if(file){
       const suffix = file.name.substring(file.name.lastIndexOf('.') + 1)
-      if (suffix.toLowerCase() !== 'jpg' && suffix.toLowerCase() !== 'png' && suffix.toLowerCase() !== 'jpeg'){
+      if (suffix.toLowerCase() !== 'jpg' && suffix.toLowerCase() !== 'png' && suffix.toLowerCase() !== 'jpeg'
+      && suffix.toLowerCase() !== 'doc' && suffix.toLowerCase() !== 'docx' && suffix.toLowerCase() !== 'pdf'){
         ElMessage.error("不支持上传此格式图片")
         return false;
       }
       beforeUploadFile = file
-      form.newPicture.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
+      form.newFile.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
     }else{
       return false;
     }
 }
-const UploadPicture = () => {
-    axios.post('/nginx/uploadByAction', form.newPicture).then(re => {
+const Upload = () => {
+    axios.post('/nginx/uploadByAction', form.newFile).then(re => {
       if (re.data.code == 200) {
         form.tempFilePath.push( re.data.data.path + "_" + beforeUploadFile.uid )
         console.log(form.tempFilePath)
         form.suffixName.push( re.data.data.suffixName )
         getHeight()
+        form.dialogVisible = true
       }else {
         ElMessage.error(re.data.message)
       }
     })
-    form.newPicture = new FormData()
+    form.newFile = new FormData()
 }
 const saveMessage = (content:string) => {
   const data = {
@@ -487,7 +487,7 @@ const sendMessage = (content : string) => {
     suffixName: form.suffixName,
     msg: content,
     toUser: form.stuId,
-    isImg:form.isImg,
+    isFile:form.isFile,
     fromUser: localStorage.getItem('stuId') };
   // if (this.aisle == "") {
   //   //群聊.
@@ -803,5 +803,16 @@ watch(
   align-items: center;
   justify-content: center;
 }
+/deep/ .el-upload {
+  display: inline;
+  text-align: center;
+  cursor: pointer;
+  outline: 0;
+  border: none;
+}
 
+/deep/ .upload-demo {
+  display: inline;
+  border: none;
+}
 </style>
