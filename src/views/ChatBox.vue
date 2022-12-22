@@ -120,6 +120,7 @@
                 <div class="talk-message-content">
 
                   <el-input
+                      :disabled="form.pictureList.length !== 0"
                       v-model="form.textarea"
                       resize="none"
                       type="textarea"
@@ -131,18 +132,20 @@
               </div>
             <div v-if="form.name" class="talk-extra">
               <div class="talk-message-face">
-                <svg class="icon" aria-hidden="true" style="color:#9b9b9b" @click="isShow">
+                <el-button  type="text" :disabled="form.pictureList.length !== 0" @click="isShow">
+                <svg class="icon" aria-hidden="true" style="color:#9b9b9b">
                   <use xlink:href="#icon-biaoqing"></use>
                 </svg>
+                </el-button>
                 <Emotion :emotionIsShow="form.emotionIsShow" @sendEmotionSelect="getValue"></Emotion>
               </div>
               <div v-if="form.name" class="talk-img">
-                <el-upload v-model:file-list="form.pictureList" class="upload-demo" action="" :before-upload="BeforeUpload"
-                           :http-request="Upload" list-type="picture"
-                           :on-preview="handlePreview"
-                           :on-remove="handleRemove" :on-change="handleChange">
+                <el-upload v-model:file-list="form.pictureList" class="upload-demo" action="" :before-upload="BeforeUploadPicture"
+                           :http-request="UploadPicture" list-type="picture"
+                           :on-preview="handlePreviewPicture"
+                           :on-remove="handleRemovePicture" :on-change="handleChangePicture">
                   <el-button  type="text" style="color:#9b9b9b" @click="form.isImg = true">
-                    <el-icon :size="22">
+                    <el-icon :size="20">
                       <Picture />
                     </el-icon>
                   </el-button>
@@ -201,13 +204,15 @@ const form = reactive({
   getContentHeight:"",
   getScrollbarHeight:"",
   stuId:"",
-  newFile:new FormData(),
+  // newFile:new FormData(),
+  newPicture:new FormData(),
   tempFilePath:[""],
   suffixName:[""],
   isImg:false,
   pictureForm:new FormData(),
   pictureList:[],
-  totalCnt:0
+  totalCnt:0,
+  storePicture: []
 });
 let beforeUploadFile : any
 interface Chat{
@@ -276,7 +281,7 @@ const getStudentList = () => {
     }
   })
 }
-const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
+const handleRemovePicture: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
   for (let i = 0; i < form.tempFilePath.length; i++) {
     var split = form.tempFilePath[i].split("_")
     //如果传入的文件uid和即将提交的图片数组中的某个uid一致，那么移除此图片
@@ -287,10 +292,10 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
   }
   getHeight()
 }
-const handlePreview: UploadProps['onPreview'] = (file) => {
+const handlePreviewPicture: UploadProps['onPreview'] = (file) => {
   console.log("preview" + file)
 }
-const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
+const handleChangePicture: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
   fileArr.value.push(uploadFile.raw)
 
 }
@@ -381,7 +386,7 @@ const submit = () => {
   }
   getHeight()
 }
-const BeforeUpload = (file : any) => {
+const BeforeUploadPicture = (file : any) => {
   if (form.tempFilePath.length > 3){
     ElMessage.warning("一次最多发送三张图片")
     return false;
@@ -393,13 +398,13 @@ const BeforeUpload = (file : any) => {
         return false;
       }
       beforeUploadFile = file
-      form.newFile.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
+      form.newPicture.append('file',file); //  2. 上传之前，拿到file对象，并将它添加到刚刚定义的FormData对象中。
     }else{
       return false;
     }
 }
-const Upload = () => {
-    axios.post('/nginx/uploadByAction', form.newFile).then(re => {
+const UploadPicture = () => {
+    axios.post('/nginx/uploadByAction', form.newPicture).then(re => {
       if (re.data.code == 200) {
         form.tempFilePath.push( re.data.data.path + "_" + beforeUploadFile.uid )
         console.log(form.tempFilePath)
@@ -409,7 +414,7 @@ const Upload = () => {
         ElMessage.error(re.data.message)
       }
     })
-    form.newFile = new FormData()
+    form.newPicture = new FormData()
 }
 const saveMessage = (content:string) => {
   const data = {
@@ -734,7 +739,7 @@ watch(
 .icon {
   width: 2em;
   height: 2em;
-  padding-top: 10px;
+  padding-top: 20px;
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
