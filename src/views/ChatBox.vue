@@ -78,9 +78,9 @@
                 </div>
                 <div style="display: flex;">
 
-                  <div class="name_right" v-if="item.myMessage">
-                    <p style="font-size: 15px; "> {{item.name}} </p>
-                  </div>
+<!--                  <div class="name_right" v-if="item.myMessage">-->
+<!--                    <p style="font-size: 15px; "> {{item.name}} </p>-->
+<!--                  </div>-->
                   <div class="url_right" v-if="item.myMessage">
                     <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
                   </div>
@@ -395,14 +395,18 @@ const submit = () => {
 }
 const BeforeUpload = (file : any) => {
   if (form.tempFilePath.length > 3){
-    ElMessage.warning("一次最多发送三张图片")
+    ElMessage.warning("一次最多发送三份文件")
     return false;
   }
     if(file){
       const suffix = file.name.substring(file.name.lastIndexOf('.') + 1)
       if (suffix.toLowerCase() !== 'jpg' && suffix.toLowerCase() !== 'png' && suffix.toLowerCase() !== 'jpeg'
-      && suffix.toLowerCase() !== 'doc' && suffix.toLowerCase() !== 'docx' && suffix.toLowerCase() !== 'pdf'){
-        ElMessage.error("不支持上传此格式图片")
+          && suffix.toLowerCase() !== 'doc' && suffix.toLowerCase() !== 'docx' && suffix.toLowerCase() !== 'pdf'
+          && suffix.toLowerCase() !== 'gif' && suffix.toLowerCase() !== 'svg' && suffix.toLowerCase() !== 'ico'
+          && suffix.toLowerCase() !== 'bmp' && suffix.toLowerCase() !== 'xlsx' && suffix.toLowerCase() !== 'ppt'
+          && suffix.toLowerCase() !== 'pptx' && suffix.toLowerCase() !== 'xls' && suffix.toLowerCase() !== 'txt'
+      ){
+        ElMessage.error("不支持上传此格式文件")
         return false;
       }
       beforeUploadFile = file
@@ -632,7 +636,7 @@ watch(
   transform: translate(-10%, -70%)
 }
 .name_right {
-  margin-left: 88%;
+  /*margin-right: 88%;*/
 }
 
 .name_left {
@@ -643,7 +647,7 @@ watch(
   word-wrap: break-word;
   width: 50%;
   text-align: right;
-  margin-left: 40%;
+  margin-left: 43%;
   font-size: 13px;
   margin-bottom: 20px;
 }
@@ -708,7 +712,7 @@ watch(
 /*  left: -13px;*/
 /*}*/
 .url_right {
-  margin-left: 7px;
+  margin-left: 93%;
 }
 
 .url-left {
