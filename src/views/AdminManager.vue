@@ -35,7 +35,7 @@
                       <el-option
                           v-for="item in options"
                           :key="item.name"
-                          :label="`${item.stuId}` + '_' + `${item.name}`"
+                          :label="`${item.name}` + ' (' + `${item.stuId}` + ')'"
                           :value="item.stuId"
                       />
                     </el-select>

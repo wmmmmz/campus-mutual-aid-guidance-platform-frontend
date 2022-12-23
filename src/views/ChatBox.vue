@@ -97,19 +97,27 @@
 
 
                 <div v-html="item.content"
-                     class="content_left" v-if="!item.myMessage && !item.isImg">
+                     class="content_left" v-if="!item.myMessage && !item.isImg && !item.isFile">
                 </div>
                 <div class="content_left" v-if="!item.myMessage && item.isImg">
                   <el-image :preview-src-list="item.srcList" :src="item.imgBase64"/>
                 </div>
-
+                <div class="content_left" v-if="!item.myMessage && item.isFile">
+                  <el-button class="btn" size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                    {{item.content}}
+                  </el-button>
+                </div>
                 <div v-html="item.content"
-                     class="content_right" v-if="item.myMessage && !item.isImg">
+                     class="content_right" v-if="item.myMessage && !item.isImg && !item.isFile">
                 </div>
                 <div class="content_right" v-if="item.myMessage && item.isImg">
                   <el-image :src="item.imgBase64" :preview-src-list="item.srcList"/>
                 </div>
-
+                <div class="content_right" v-if="item.myMessage && item.isFile">
+                    <el-button class="btn"  size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                      {{item.content}}
+                    </el-button>
+                </div>
               </div>
 
             </div>
@@ -209,7 +217,7 @@ const form = reactive({
   isFile:false,
   fileList:[],
   totalCnt:0,
-  dialogVisible:false
+  fileName:[""]
 });
 let beforeUploadFile : any
 interface Chat{
@@ -286,6 +294,7 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
     if (uploadFile.raw && uploadFile.raw.uid === parseInt(split[1])) {
       form.tempFilePath.splice(i, 1);
       form.suffixName.splice(i, 1)
+      form.fileName.splice(i, 1)
     }
   }
   getHeight()
@@ -408,8 +417,8 @@ const Upload = () => {
         form.tempFilePath.push( re.data.data.path + "_" + beforeUploadFile.uid )
         console.log(form.tempFilePath)
         form.suffixName.push( re.data.data.suffixName )
+        form.fileName.push(beforeUploadFile.name)
         getHeight()
-        form.dialogVisible = true
       }else {
         ElMessage.error(re.data.message)
       }
@@ -485,6 +494,7 @@ const sendMessage = (content : string) => {
   var socketMsg = {
     tempFilePath: form.tempFilePath,
     suffixName: form.suffixName,
+    fileName: form.fileName,
     msg: content,
     toUser: form.stuId,
     isFile:form.isFile,
@@ -555,6 +565,30 @@ const connectWebSocket = () => {
 
 
 }
+
+const downloadFile = (url : string, name : string) => {
+  const a = document.createElement("a")
+  a.setAttribute("href",url)
+  a.setAttribute("download",name)
+  a.setAttribute("target","_blank")
+  let clickEvent = document.createEvent("MouseEvents");
+  clickEvent.initEvent("click", true, true);
+  a.dispatchEvent(clickEvent);
+}
+const dataURLtoBlob = (dataurl : any) => {
+  let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
+const downloadFileByBase64 = (base64 : string ,name : string) => {
+  console.log(base64)
+  const myBlob = dataURLtoBlob(base64)
+  const myUrl = URL.createObjectURL(myBlob)
+  downloadFile(myUrl,name)
+}
 watch(
 
     () => router.currentRoute.value.path,
@@ -607,9 +641,9 @@ watch(
 
 .content_right {
   word-wrap: break-word;
-  width: 30%;
+  width: 50%;
   text-align: right;
-  margin-left: 62%;
+  margin-left: 40%;
   font-size: 13px;
   margin-bottom: 20px;
 }
@@ -617,7 +651,7 @@ watch(
 
 .content_left {
   word-wrap: break-word;
-  width: 30%;
+  width: 50%;
   margin-left: 60px;
   font-size: 13px;
   text-align: left;
@@ -814,5 +848,16 @@ watch(
 /deep/ .upload-demo {
   display: inline;
   border: none;
+}
+
+.btn{
+  max-width: 350px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  text-align: left;
+  height: auto;
+  line-height: 2;
+  overflow: hidden;
 }
 </style>
