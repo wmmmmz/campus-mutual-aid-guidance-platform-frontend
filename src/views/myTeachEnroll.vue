@@ -14,7 +14,7 @@
       <el-input v-model="form.search" style="width:200px" placeholder="Type to search" @input="inputChange()"/>
       <br><br>
     <el-collapse v-model="form.activeNames" @change="handleChange">
-      <div v-for="(data, key) in tableData">
+      <div v-for="(data, key) in tableData" v-if="form.totalCnt !== 0">
       <el-collapse-item :name="key">
         <template #title>
             <p class="collapse-title">{{data.className}}</p>
@@ -70,6 +70,7 @@
         </div>
       </el-collapse-item>
       </div>
+      <el-empty :image-size="500" :image="EmptyBackground" v-if="form.totalCnt === 0" description="暂无数据"/>
     </el-collapse>
       <el-pagination
           style="justify-content: center; margin-top: 20px"
@@ -91,6 +92,7 @@
 <script lang="ts" setup>
 import {computed, createApp, onMounted, reactive, ref, watch} from 'vue'
 import axios from "axios";
+import EmptyBackground from '../assets/img/my_teach_enroll_empty_bg.jpg'
 import {ElMessage, ElNotification} from "element-plus";
 import { Document, User, Check, Finished } from '@element-plus/icons-vue'
 import {onBeforeRouteUpdate} from "vue-router";
