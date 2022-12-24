@@ -68,60 +68,60 @@
           <div class="talk">
             <el-empty :image-size="700" :image="EmptyBackground" :style="form.getContentHeight + ';overflow:auto'"
                       v-if="!form.name"  description="have a nice day ~"/>
+
             <div v-if="form.name" class="talk-content" id="talk-content" :style="form.getContentHeight + ';overflow:auto'" >
 
-              <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
+                <div v-for="(item, index)  in contentDiv" style="margin-top: 15px;">
 
-                <div style="text-align: center">
-                  <p v-if="index === form.totalCnt - 1 || index !== form.totalCnt - 1 && item.time !== contentDiv[index + 1].time"
-                     style="font-size: 10px;color: #9b9b9b"> {{item.time}}</p>
-                </div>
-                <div style="display: flex;">
-
-<!--                  <div class="name_right" v-if="item.myMessage">-->
-<!--                    <p style="font-size: 15px; "> {{item.name}} </p>-->
-<!--                  </div>-->
-                  <div class="url_right" v-if="item.myMessage">
-                    <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
+                  <div style="text-align: center">
+                    <p v-if="index === form.totalCnt - 1 || index !== form.totalCnt - 1 && item.time !== contentDiv[index + 1].time"
+                       style="font-size: 10px;color: #9b9b9b"> {{item.time}}</p>
                   </div>
-                  <div class="url-left" v-if="!item.myMessage">
-                    <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
+                  <div style="display: flex;">
+
+  <!--                  <div class="name_right" v-if="item.myMessage">-->
+  <!--                    <p style="font-size: 15px; "> {{item.name}} </p>-->
+  <!--                  </div>-->
+                    <div class="url_right" v-if="item.myMessage">
+                      <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
+                    </div>
+                    <div class="url-left" v-if="!item.myMessage">
+                      <el-avatar shape="circle" :size="40" :src="item.avatar"></el-avatar>
+                    </div>
+
+
+                    <div class="name_left" v-if="!item.myMessage">
+                      <p style="font-size: 15px;"> {{item.name}} </p>
+                    </div>
+
                   </div>
 
 
-                  <div class="name_left" v-if="!item.myMessage">
-                    <p style="font-size: 15px;"> {{item.name}} </p>
+                  <div v-html="item.content"
+                       class="content_left" v-if="!item.myMessage && !item.isImg && !item.isFile">
                   </div>
-
-                </div>
-
-
-                <div v-html="item.content"
-                     class="content_left" v-if="!item.myMessage && !item.isImg && !item.isFile">
-                </div>
-                <div class="content_left" v-if="!item.myMessage && item.isImg">
-                  <el-image :preview-src-list="item.srcList" :src="item.imgBase64"/>
-                </div>
-                <div class="content_left" v-if="!item.myMessage && item.isFile">
-                  <el-button class="btn" size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
-                    {{item.content}}
-                  </el-button>
-                </div>
-                <div v-html="item.content"
-                     class="content_right" v-if="item.myMessage && !item.isImg && !item.isFile">
-                </div>
-                <div class="content_right" v-if="item.myMessage && item.isImg">
-                  <el-image :src="item.imgBase64" :preview-src-list="item.srcList"/>
-                </div>
-                <div class="content_right" v-if="item.myMessage && item.isFile">
-                    <el-button class="btn"  size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                  <div class="content_left" v-if="!item.myMessage && item.isImg">
+                    <el-image :preview-src-list="item.srcList" :src="item.imgBase64"/>
+                  </div>
+                  <div class="content_left" v-if="!item.myMessage && item.isFile">
+                    <el-button class="btn" size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
                       {{item.content}}
                     </el-button>
+                  </div>
+                  <div v-html="item.content"
+                       class="content_right" v-if="item.myMessage && !item.isImg && !item.isFile">
+                  </div>
+                  <div class="content_right" v-if="item.myMessage && item.isImg">
+                    <el-image :src="item.imgBase64" :preview-src-list="item.srcList"/>
+                  </div>
+                  <div class="content_right" v-if="item.myMessage && item.isFile">
+                      <el-button class="btn"  size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                        {{item.content}}
+                      </el-button>
+                  </div>
                 </div>
-              </div>
-
+              <InfiniteLoading @infinite="load" style="height: 1%"/>
             </div>
-
 
             <div v-if="form.name" class=" talk-message">
 
@@ -132,7 +132,7 @@
                       v-model="form.textarea"
                       resize="none"
                       type="textarea"
-                      rows="1"
+                      autosize
                       @keyup.enter.native="submit"
                   ></el-input>
                 </div>
@@ -185,6 +185,7 @@ import avatar from '../assets/img/img.jpg';
 import axios from "axios";
 import {useRoute} from "vue-router";
 import {ElMessage} from 'element-plus';
+import InfiniteLoading from "v3-infinite-loading";
 import type { UploadProps, UploadUserFile } from 'element-plus'
 import router from "../router";
 import {push} from "echarts/types/src/component/dataZoom/history";
@@ -240,7 +241,8 @@ interface Conversation{
   latestMessageTime:string
 }
 const conversationList = ref<Conversation>()
-const contentDiv = ref<Chat>()
+const contentDiv = ref<Chat[]>([])
+const newContentDiv = ref<Chat>()
 const studentList = ref<User[]>([])
 interface User {
   name: string
@@ -263,6 +265,27 @@ const options = ref<ListItem[]>([])
 const value = ref<string[]>([])
 const loading = ref(false)
 const activeIndex = ref('1')
+const load = () => {
+console.log("loading")
+  const data = {
+    stuId : form.stuId,
+    myStuId: localStorage.getItem('stuId'),
+    startIndex: form.totalCnt,
+    pageSize: 10
+  }
+  axios.get('/chat/getMessageList', {params:data}).then(re => {
+    if (re.data.code === 200){
+      re.data.data.forEach((data: Chat) => {
+        contentDiv.value.push(data);
+        console.log("loading" + data)
+      })
+      form.totalCnt += re.data.data.length
+      console.log("loading" + form.totalCnt)
+    }else if (form.totalCnt > 10){
+      ElMessage.warning(re.data.message)
+    }
+  })
+}
 const remoteMethod = (query: string) => {
   if (query) {
     loading.value = true
@@ -298,13 +321,6 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
     }
   }
   getHeight()
-}
-const handlePreviewPicture: UploadProps['onPreview'] = (file) => {
-  console.log("preview" + file)
-}
-const handleChangePicture: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
-  fileArr.value.push(uploadFile.raw)
-
 }
 const handleSelect = (key: Conversation) => {
   form.imgSrc = key.avatar
@@ -389,6 +405,7 @@ const submit = () => {
     form.isFile = false
     form.tempFilePath = [""]
     form.suffixName = [""]
+    form.fileName = [""]
     form.fileList = []
   }
   getHeight()
@@ -474,14 +491,18 @@ const getConversationList = () => {
 const getMessageList = (stuId : string) => {
   const data = {
     stuId : stuId,
-    myStuId: localStorage.getItem('stuId')
+    myStuId: localStorage.getItem('stuId'),
+    //初始化取十条数据
+    startIndex: 0,
+    pageSize: 10
   }
   axios.get('/chat/getMessageList', {params:data}).then(re => {
     if (re.data.code === 200){
       contentDiv.value = re.data.data;
       form.totalCnt = re.data.data.length
-    }else{
-      ElMessage.error(re.data.message)
+    }else {
+      contentDiv.value = [];
+      form.totalCnt = 0;
     }
   })
 }
@@ -540,10 +561,12 @@ const connectWebSocket = () => {
         if (object.type == 1) {
           console.log("getMessageList");
           if(object.toUser === form.stuId){
-            contentDiv.value = object.myMessage;
             const list = object.myMessage as Array<Chat>
-            form.totalCnt = list.length
-            console.log("totalCnt" + form.totalCnt)
+            list.forEach((data) => {
+              contentDiv.value.unshift(data)
+            })
+            form.totalCnt += list.length
+            console.log("after save loading" + form.totalCnt)
             // console.log(contentDiv.value)
             clearUnreadCnt(form.stuId)
             object.myConversation.forEach((conversation: Conversation ) => {
@@ -840,6 +863,10 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
+}
+/deep/ .container {
+border: none;
+  background: none;
 }
 /deep/ .el-upload {
   display: inline;

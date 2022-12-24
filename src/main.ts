@@ -10,7 +10,6 @@ import 'element-plus/dist/index.css'
 import './assets/css/icon.css'
 import axios from "axios"
 
-
 const app = createApp(App)
 
 app.use(createPinia())
