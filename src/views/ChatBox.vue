@@ -104,7 +104,7 @@
                     <el-image :preview-src-list="item.srcList" :src="item.imgBase64"/>
                   </div>
                   <div class="content_left" v-if="!item.myMessage && item.isFile">
-                    <el-button class="btn" size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                    <el-button class="btn" size="100px" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
                       {{item.content}}
                     </el-button>
                   </div>
@@ -115,7 +115,10 @@
                     <el-image :src="item.imgBase64" :preview-src-list="item.srcList"/>
                   </div>
                   <div class="content_right" v-if="item.myMessage && item.isFile">
-                      <el-button class="btn"  size="large" plain icon="Document" @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                      <el-button class="btn"  size="large" plain @click="downloadFileByBase64(item.imgBase64, `${item.content}`)">
+                        <el-icon :size="40" style="margin-right: 15px">
+                          <Document />
+                        </el-icon>
                         {{item.content}}
                       </el-button>
                   </div>
