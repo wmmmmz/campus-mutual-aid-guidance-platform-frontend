@@ -352,7 +352,7 @@ onMounted(() =>{
 })
 const getHeight = () => {
   form.getHeight = "height:" + (window.innerHeight - 130) + "px"
-  form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 50) + "px"
+  form.getContentHeight = "height:" + (window.innerHeight - 310 - form.tempFilePath.length * 37) + "px"
   form.getScrollbarHeight = (window.innerHeight - 230) + "px"
 }
 const isShow = () =>{
