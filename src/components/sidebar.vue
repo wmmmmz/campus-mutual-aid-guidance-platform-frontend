@@ -68,12 +68,12 @@ const items = [
 		permiss: 'myMessage'
 	},
   {
-    icon: 'DocumentCopy',
+    icon: 'Notification',
     index: '/publishNews',
     title: '发布通知',
     permiss: 'publishNews'
   }, {
-    icon: 'Edit',
+    icon: 'User',
     index: '/hireTeacher',
     title: '招募导生',
     permiss: 'hireTeacher'
@@ -115,7 +115,7 @@ const items = [
       }
     ]
   }, {
-    icon: 'DocumentCopy',
+    icon: 'Service',
     index: '/enrollTeach',
     title: '报名授课',
     permiss: 'enrollTeach',
@@ -131,22 +131,22 @@ const items = [
       }
     ]
   }, {
-    icon: 'Calendar',
+    icon: 'Notebook',
     index: '/courseManager',
     title: '课程管理',
     permiss: 'courseManager'
   }, {
-    icon: 'PieChart',
+    icon: 'Clock',
     index: '/termManager',
     title: '学期管理',
     permiss: 'termManager'
   }, {
-    icon: 'PieChart',
+    icon: 'PictureRounded',
     index: '/carouselChartManager',
     title: '轮播图管理',
     permiss: 'carouselChartManager'
   }, {
-    icon: 'DocumentCopy',
+    icon: 'Headset',
     index: '/enrollClass',
     title: '报名上课',
     permiss: 'enrollClass',
@@ -162,7 +162,7 @@ const items = [
       }
     ]
   }, {
-    icon: 'PieChart',
+    icon: 'Connection',
     index: '/adminManager',
     title: '管理员管理',
     permiss: 'adminManager'
