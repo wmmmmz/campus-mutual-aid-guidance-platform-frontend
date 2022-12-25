@@ -19,16 +19,16 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column v-if="form.role === 'admin'" label="发布人" min-width="10%">
+        <el-table-column v-if="form.role === 'admin' || form.role === 'superAdmin'" label="发布人" min-width="10%">
           <template #default="scope">
             <el-popover effect="light" trigger="hover" placement="top" width="auto">
               <template #default>
-                <div v-if="form.role === 'admin'">班级: {{ scope.row.senderClassName }}</div>
-                <div v-if="form.role === 'admin'">电话: {{ scope.row.senderTel }}</div>
-                <div v-if="form.role === 'admin'">微信: {{ scope.row.senderWx }}</div>
+                <div v-if="form.role === 'admin' || form.role === 'superAdmin'">班级: {{ scope.row.senderClassName }}</div>
+                <div v-if="form.role === 'admin' || form.role === 'superAdmin'">电话: {{ scope.row.senderTel }}</div>
+                <div v-if="form.role === 'admin' || form.role === 'superAdmin'">微信: {{ scope.row.senderWx }}</div>
               </template>
               <template #reference>
-                <el-tag v-if="form.role === 'admin'">{{ scope.row.senderName }}</el-tag>
+                <el-tag v-if="form.role === 'admin' || form.role === 'superAdmin'">{{ scope.row.senderName }}</el-tag>
               </template>
             </el-popover>
           </template>

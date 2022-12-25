@@ -27,45 +27,13 @@ const routes:RouteRecordRaw[] = [
                     permiss: 'myMessage'
                 },
                 component: () => import ( /* webpackChunkName: "tabs" */ "../views/tabs.vue")
-            },{
-                path: "/permission",
-                name: "permission",
-                meta: {
-                    title: '权限管理',
-                    permiss: '13'
-                },
-                component: () => import ( /* webpackChunkName: "permission" */ "../views/permission.vue")
-            },{
-                path: "/icon",
-                name: "icon",
-                meta: {
-                    title: '自定义图标',
-                    permiss: '10'
-                },
-                component: () => import ( /* webpackChunkName: "icon" */ "../views/icon.vue")
-            },  {
+            }, {
                 path: '/user',
                 name: 'user',
                 meta: {
                     title: '个人中心'
                 },
                 component: () => import (/* webpackChunkName: "user" */ '../views/user.vue')
-            }, {
-                path: '/editor',
-                name: 'editor',
-                meta: {
-                    title: '富文本编辑器',
-                    permiss: '8'
-                },
-                component: () => import (/* webpackChunkName: "editor" */ '../views/editor.vue')
-            }, {
-                path: '/markdown',
-                name: 'markdown',
-                meta: {
-                    title: 'markdown编辑器',
-                    permiss: '9'
-                },
-                component: () => import (/* webpackChunkName: "markdown" */ '../views/markdown.vue')
             }, {
                 path: '/publishNews',
                 name: 'publishNews',
