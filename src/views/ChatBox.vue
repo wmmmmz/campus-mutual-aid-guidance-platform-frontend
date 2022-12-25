@@ -400,7 +400,6 @@ const submit = () => {
 
   form.textarea = "";
   form.textarea1 = "";
-  // saveMessage(a)
   if (!form.isFile && a == "" || a == null || a == undefined && form.tempFilePath.length === 0){
     ElMessage.error("请先输入")
   }else{
