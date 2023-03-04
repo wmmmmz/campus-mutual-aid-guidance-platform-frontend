@@ -71,6 +71,7 @@
         </el-table-column>
         <el-table-column align="right" min-width="43%">
           <template #default="scope">
+            <el-link  @click="interviewLink(scope.row.interviewLink)" type="primary" v-if="scope.row.status == '安排面试'">面试链接</el-link>&nbsp;
             <el-button @click="downloadFileByBase64(scope.row.resumeUrl, scope.row.studentName + '_' + form.termChoose + '_' + scope.row.className + '_个人简历')" >下载简历</el-button>
             <el-button @click="form.changeDialogVisible[scope.$index] = true, handleChange(scope.row)">修改状态</el-button>
             <el-dialog v-model="form.changeDialogVisible[scope.$index]" title="修改状态" width="33%" append-to-body = "true">

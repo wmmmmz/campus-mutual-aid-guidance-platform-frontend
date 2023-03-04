@@ -340,7 +340,7 @@ const dayData = [
 ]
 const teacherData = [
   {value:'王萌哲'},
-  {value:'王萌哲'},
+  {value:''},
 ]
 const filterTag = (value: string, row: Class) => {
   return row.status === value

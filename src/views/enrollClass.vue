@@ -4,7 +4,7 @@
     <el-card shadow="hover">
       <template #header>
         <div class="clearfix">
-          <h2>{{form.termChoose}} 可报名上课班级数：{{form.enrollClassCnt}}</h2>
+          <h2>{{form.termChoose}} 可报名上课班级</h2>
         </div>
       </template>
       <el-table :data="tableData" style="width: 100%">
