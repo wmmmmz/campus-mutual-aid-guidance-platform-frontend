@@ -31,6 +31,19 @@ axios.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
+axios.interceptors.response.use(data=> {
+    // 对响应数据做点什么
+    console.log(data.data.code)
+    if (data.data.code === 403){
+        router.push("/login")
+    }
+    return data;
+}, function (error) {
+    // 对响应错误做点什么
+    return Promise.reject(error);
+});
+
+
 
 
 // 注册elementplus图标
